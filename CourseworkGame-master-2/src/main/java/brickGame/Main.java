@@ -17,9 +17,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
-//Testing git
-//Test 2
-//Testing branch
+//testing 3
 
 import java.io.*;
 import java.util.ArrayList;
