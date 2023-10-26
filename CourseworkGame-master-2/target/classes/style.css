@@ -1,13 +1,29 @@
+
+@font-face {
+    font-family: 'Press Start 2P';
+    src: url("font/PressStart2P-Regular.ttf");
+}
+
 .root {
-    -fx-background-color: #1d1d1d;
+    -fx-background-color:rgb(245, 227, 224);
+    -fx-background-image: url("background.png");
 }
 
 .goldRoot {
     -fx-background-color: #4b4a08;
 }
 
-.label {
-    -fx-text-fill: #FFF;
+
+.text {
+    -fx-font-family: 'Press Start 2P';
+    -fx-text-fill: rgb(255, 255, 255);
     -fx-label-padding: 8px;
-    -fx-font-size: 20px;
+    -fx-font-size: 12px;
+}
+
+#button {
+    -fx-background-color: rgb(137, 207, 240);
+    -fx-text-fill: rgb(255, 255, 255);
+    -fx-border-color: rgb(255, 255, 255);
+    -fx-border-width: 4px;
 }

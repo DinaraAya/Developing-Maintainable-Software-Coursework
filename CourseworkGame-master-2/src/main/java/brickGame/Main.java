@@ -17,8 +17,6 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
-//testing 3
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
@@ -98,6 +96,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     Stage  primaryStage;
     Button load    = null;
     Button newGame = null;
+    Button settings = null;
+    Button pause = null;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -119,11 +119,41 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             initBoard();
 
             load = new Button("Load Game");
-            newGame = new Button("Start New Game");
+            
+
+            newGame = new Button("PLAY");
+            newGame.setId("button");
+            settings = new Button("SETTINGS");
+            settings.setId("button");
+            pause = new Button();
+            pause.setId("button");
+
+            //Image pauseImage = new Image("pauseButton.png");
+            //ImageView pauseView = new ImageView(pauseImage);
+
+            pause.setTranslateX(sceneWidth - 280);
+            pause.setTranslateY(5);
+
+            pause.setPrefSize(55, 45);
+            //pause.setGraphic(pauseView);
+
             load.setTranslateX(220);
             load.setTranslateY(300); 
-            newGame.setTranslateX(220);
-            newGame.setTranslateY(340);
+
+
+            newGame.setPrefWidth(200);
+            newGame.setPrefHeight(50);
+
+            newGame.setTranslateX(145);
+            newGame.setTranslateY(300);
+
+
+            settings.setPrefHeight(50);
+            settings.setPrefWidth(200);
+
+            settings.setTranslateX(145);
+            settings.setTranslateY(370);
+
 
             heartImageView = new ImageView(new Image("lives.png"));
             heartImageView.setTranslateX(sceneWidth - 100);
@@ -136,14 +166,14 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
 
         root = new Pane();
-        scoreLabel = new Label("Score: " + score);
-        levelLabel = new Label("Level: " + level);
-        levelLabel.setTranslateY(20);
-        heartLabel = new Label("x " + heart);
-        heartLabel.setTranslateY(10);
-        heartLabel.setTranslateX(sceneWidth - 49);
+        scoreLabel = new Label("SCORE: " + score);
+        levelLabel = new Label("LEVEL: " + level);
+        levelLabel.setTranslateY(30);
+        heartLabel = new Label("X" + heart);
+        heartLabel.setTranslateY(15);
+        heartLabel.setTranslateX(sceneWidth - 55);
         if (loadFromSave == false) {
-            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, heartImageView);
+            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, heartImageView, settings);
         } else {
             root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, heartImageView);
         }
@@ -153,6 +183,11 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         Scene scene = new Scene(root, sceneWidth, sceneHeigt);
         scene.getStylesheets().add("style.css");
         scene.setOnKeyPressed(this);
+
+
+        scoreLabel.getStyleClass().add("text");
+        levelLabel.getStyleClass().add("text");
+        heartLabel.getStyleClass().add("text");
 
         primaryStage.setTitle("Game");
         primaryStage.setScene(scene);
@@ -188,6 +223,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
                     load.setVisible(false);
                     newGame.setVisible(false);
+                    settings.setVisible(false);
                 }
             });
         } else {
@@ -651,8 +687,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             @Override
             public void run() {
 
-                scoreLabel.setText("Score: " + score);
-                heartLabel.setText(" " + heart);
+                scoreLabel.setText("SCORE: " + score);
+                heartLabel.setText("X" + heart);
 
                 rect.setX(xBreak);
                 rect.setY(yBreak);
