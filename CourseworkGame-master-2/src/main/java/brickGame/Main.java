@@ -25,6 +25,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     private ImageView heartImageView;
 
+    private boolean isGamePaused = false;
+
     private int level = 0;
 
     private double xBreak = 0.0f;
@@ -126,16 +128,18 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             settings = new Button("SETTINGS");
             settings.setId("button");
             pause = new Button();
-            pause.setId("button");
+            pause.setId("pause-button");
 
-            //Image pauseImage = new Image("pauseButton.png");
-            //ImageView pauseView = new ImageView(pauseImage);
+            Image pauseImage = new Image("pauseButton.png");
+            ImageView pauseView = new ImageView(pauseImage);
 
             pause.setTranslateX(sceneWidth - 280);
             pause.setTranslateY(5);
 
             pause.setPrefSize(55, 45);
-            //pause.setGraphic(pauseView);
+            pause.setGraphic(pauseView);
+
+            //ImageView buttonView = new ImageView(new Image("buttons.png"));
 
             load.setTranslateX(220);
             load.setTranslateY(300); 
@@ -143,6 +147,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
             newGame.setPrefWidth(200);
             newGame.setPrefHeight(50);
+            //newGame.setGraphic(buttonView);
 
             newGame.setTranslateX(145);
             newGame.setTranslateY(300);
@@ -173,7 +178,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         heartLabel.setTranslateY(15);
         heartLabel.setTranslateX(sceneWidth - 55);
         if (loadFromSave == false) {
-            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, heartImageView, settings);
+            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, heartImageView, settings, pause);
         } else {
             root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, heartImageView);
         }
@@ -341,7 +346,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         rect.setX(xBreak);
         rect.setY(yBreak);
 
-        ImagePattern pattern = new ImagePattern(new Image("block.jpg"));
+        ImagePattern pattern = new ImagePattern(new Image("ground.png"));
 
         rect.setFill(pattern);
     }
