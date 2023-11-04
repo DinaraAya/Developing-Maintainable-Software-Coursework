@@ -15,32 +15,32 @@ public class Score {
         } else {
             sign = "";
         }
-        final Label label = new Label(sign + score);
-        label.setTranslateX(x);
-        label.setTranslateY(y);
+        // final Label label = new Label(sign + score);
+        // label.setTranslateX(x);
+        // label.setTranslateY(y);
 
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                main.root.getChildren().add(label);
-            }
-        });
+        // Platform.runLater(new Runnable() {
+        //     @Override
+        //     public void run() {
+        //         main.root.getChildren().add(label);
+        //     }
+        // });
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < 21; i++) {
-                    try {
-                        label.setScaleX(i);
-                        label.setScaleY(i);
-                        label.setOpacity((20 - i) / 20.0);
-                        Thread.sleep(15);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
+        // new Thread(new Runnable() {
+        //     @Override
+        //     public void run() {
+        //         for (int i = 0; i < 21; i++) {
+        //             try {
+        //                 label.setScaleX(i);
+        //                 label.setScaleY(i);
+        //                 label.setOpacity((20 - i) / 20.0);
+        //                 Thread.sleep(15);
+        //             } catch (InterruptedException e) {
+        //                 e.printStackTrace();
+        //             }
+        //         }
+        //     }
+        // }).start();
     }
 
     public void showMessage(String message, final Main main) {

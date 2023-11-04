@@ -6,7 +6,7 @@
 
 .root {
     -fx-background-color:rgb(245, 227, 224);
-    -fx-background-image: url("background.png");
+    -fx-background-image: url("background1.png");
 }
 
 .goldRoot {
@@ -16,13 +16,21 @@
 
 .text {
     -fx-font-family: 'Press Start 2P';
-    -fx-text-fill: rgb(255, 255, 255);
+    -fx-text-fill: rgb(203, 67, 142);
     -fx-label-padding: 8px;
     -fx-font-size: 12px;
 }
 
-#button {
-    -fx-background-image: url("buttons.png");
+.bigText {
+    -fx-font-family: 'Press Start 2P';
+    -fx-text-fill: rgb(203, 67, 142);
+    -fx-label-padding: 8px;
+    -fx-font-size: 24px;
+}
+
+
+.button {
+    -fx-background-image: url("button.png");
     -fx-text-fill: rgb(255, 255, 255);
 }
 

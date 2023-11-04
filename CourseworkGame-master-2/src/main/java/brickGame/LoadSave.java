@@ -40,7 +40,6 @@ public class LoadSave {
         try {
             ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(new File(Main.savePath)));
 
-
             level = inputStream.readInt();
             score = inputStream.readInt();
             heart = inputStream.readInt();

@@ -82,6 +82,8 @@ public class GameEngine {
 
     private Thread timeThread;
 
+    
+
     private void TimeStart() {
         timeThread = new Thread(new Runnable() {
             @Override
