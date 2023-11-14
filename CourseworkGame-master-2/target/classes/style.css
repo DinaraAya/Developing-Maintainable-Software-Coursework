@@ -38,3 +38,17 @@
     -fx-padding: 0;
     -fx-background-insets: 0;
 }
+
+
+.custom-volume-slider .track {
+    -fx-padding: 8;
+    -fx-border-width: 3;
+    -fx-border-color: rgb(255, 255, 255);
+    -fx-background-image: url("slider.png");
+}
+
+.custom-volume-slider .thumb {
+    -fx-padding: 15;
+    -fx-background-radius: 0; /* Adjust the roundness of the thumb */
+    -fx-background-image: url("thumb.png");
+}

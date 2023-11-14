@@ -28,6 +28,8 @@ public class Block implements Serializable {
     private int paddingTop = height * 2;
     private int paddingH = 50;
     public Rectangle rect;
+    public Rectangle leftBorder;
+    public Rectangle rightBorder;
 
 
     public static int NO_HIT = -1;
