@@ -23,8 +23,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
@@ -54,6 +52,8 @@ import javafx.util.Duration;
 
 
 public class Main extends Application implements EventHandler<KeyEvent>, GameEngine.OnAction {
+    private BgMusicManager bgMusicManager;
+    private SliderManager sliderManager;
 
     private boolean isGamePaused = false;
     private ImageView heartImageView;
@@ -103,7 +103,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private int countDown = 3;
 
     private double bgVol = 0.5;
-    // private double soundVol = 0.5;
 
     private GameEngine engine;
     public static String savePath    = "D:/save/save.mdds";
@@ -126,7 +125,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             Color.TOMATO,
             Color.TAN,
     };
-    public  Pane             root;
+    public  Group             root;
+    public  Group             pauseRoot;
     private Label            scoreLabel;
     private Label            heartLabel;
     private Label            levelLabel;
@@ -137,9 +137,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private Label            countDownLabel;
     private String           bgMusicFile;
     private Media            bgMusicMedia;
+    private Slider           bgMusicSlider;
 
-    private Slider        bgMusicController;
-    private Slider        soundController;
+
     private MediaPlayer     mediaPlayer;
     private Timeline        timeline;
 
@@ -149,6 +149,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     Button load    = null;
     Button newGame = null;
     Button settings = null;
+    Button quit = null;
     Button pause = null;
     Button resumeButton = null;
     Button resumeButton2 = null;
@@ -160,13 +161,22 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        this.primaryStage = primaryStage;
+        bgMusicManager = BgMusicManager.getInstance();
+        
 
-        bgMusicFile = "/bgMusic.mp3";
-        bgMusicMedia = new Media(getClass().getResource(bgMusicFile).toString());
-            mediaPlayer = new MediaPlayer(bgMusicMedia);
-            mediaPlayer.setVolume(0.5); 
-            mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE); 
+        if (!bgMusicManager.isPlaying()) {
+            bgMusicManager.initialize("/bgMusic.mp3");
+            bgMusicManager.play();
+        }
+
+        if (sliderManager == null) {
+            sliderManager = SliderManager.getInstance();
+            bgMusicSlider = sliderManager.getBgMusicController();
+        }
+
+
+
+        this.primaryStage = primaryStage;
 
 
         if (loadFromSave == false) {
@@ -197,6 +207,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             settings.setId("button");
             pause = new Button();
             pause.setId("pause-button");
+            quit = new Button("QUIT");
+            quit.setId("button");
 
             Image pauseImage = new Image("pauseButton.png");
             ImageView pauseView = new ImageView(pauseImage);
@@ -211,7 +223,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             load.setPrefSize(200, 50);
 
             load.setTranslateX(145);
-            load.setTranslateY(310); 
+            load.setTranslateY(430); 
             load.setVisible(true);
 
             load.setOnAction(new EventHandler<ActionEvent>() {
@@ -239,7 +251,14 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             settings.setPrefWidth(200);
 
             settings.setTranslateX(145);
-            settings.setTranslateY(370);
+            settings.setTranslateY(310);
+
+            quit.setPrefHeight(50);
+            quit.setPrefWidth(200);
+
+            quit.setTranslateX(145);
+            quit.setTranslateY(370);
+
 
             Image resumeImage = new Image("resume1.png");
             ImageView resumeView = new ImageView(resumeImage);
@@ -256,7 +275,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         resumeButton.setTranslateX(210);
         resumeButton.setTranslateY(400);
 
-        resumeButton.setVisible(false);
+        // resumeButton.setVisible(false);
 
 
             resumeButton2 = new Button("");
@@ -274,27 +293,16 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         resumeButton2.setVisible(false);
         
 
-        resumeButton.setOnAction(event -> {
-            isGamePaused = false;
-            resumeButton.setVisible(false);
-            restartButton.setVisible(false);
-            homeButton.setVisible(false);
-            pauseMenu.setVisible(false);
-            pauseLabel.setVisible(false);
-            bgMusicController.setVisible(false);
-            soundController.setVisible(false);
-            engine.start();
-        });
-
         resumeButton2.setOnAction(event -> {
             pauseMenu.setVisible(false);
             resumeButton2.setVisible(false);
             newGame.setVisible(true);
             settings.setVisible(true);
+            quit.setVisible(true);
             settingLabel.setVisible(false);
             load.setVisible(true);
-            bgMusicController.setVisible(false);
-            soundController.setVisible(false);
+            bgMusicSlider.setVisible(false);
+            // soundController.setVisible(false);
         }); 
 
         Image restartButtonImage = new Image("restart.png");
@@ -308,7 +316,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         restartButton.setTranslateY(405);
 
         restartButton.setGraphic(restartButtonView);
-        restartButton.setVisible(false);
+        // restartButton.setVisible(false);
 
         Image homeButtonImage = new Image("homeButton.png");
         ImageView homeButtonView = new ImageView(homeButtonImage);
@@ -321,7 +329,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         homeButton.setTranslateY(405);
 
         homeButton.setGraphic(homeButtonView);
-        homeButton.setVisible(false);
+        // homeButton.setVisible(false);
 
         pauseMenu = new Rectangle(345, 130);
         pauseMenu.setTranslateY(250);
@@ -331,7 +339,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         ImagePattern pauseMenuPattern = new ImagePattern(pauseMenuImage);
 
         pauseMenu.setFill(pauseMenuPattern);
-        pauseMenu.setVisible(false);
+        // pauseMenu.setVisible(false);
 
         pauseLabel = new Label("PAUSE");
         pauseLabel.getStyleClass().add("bigText");
@@ -339,7 +347,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         pauseLabel.setTranslateX(180);
         pauseLabel.setTranslateY(200);
-        pauseLabel.setVisible(false);
+        // pauseLabel.setVisible(false);
 
         settingLabel = new Label("SETTING");
         settingLabel.getStyleClass().add("bigText");
@@ -403,14 +411,22 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         okButton.setTranslateY(400);
         okButton.setVisible(false);
 
+
+
         settings.setOnAction(event -> {
             pauseMenu.setVisible(true);
             resumeButton2.setVisible(true);
             settings.setVisible(false);
+            quit.setVisible(false);
             settingLabel.setVisible(true);
             load.setVisible(false);
-            bgMusicController.setVisible(true);
-            soundController.setVisible(true);
+            bgMusicSlider.setVisible(true);
+            // soundController.setVisible(true);
+        });
+
+
+        quit.setOnAction(event-> {
+            Platform.exit();
         });
 
             heartImageView = new ImageView(new Image("lives.png"));
@@ -420,29 +436,21 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             heartImageView.setFitWidth(heartWidth);
             heartImageView.setFitHeight(heartHeight);
 
+            pauseRoot = new Group();
+            Scene pauseScene = new Scene(pauseRoot, sceneWidth, sceneHeigt);
+            pauseScene.getStylesheets().add("style.css");
+
 
             pause.setOnAction(event -> {
                 if(!isGamePaused) {
                     isGamePaused = true;
                     engine.stop();
-                    resumeButton.setVisible(true);
-                    restartButton.setVisible(true);
-                    homeButton.setVisible(true);
-                    pauseMenu.setVisible(true);
-                    pauseLabel.setVisible(true);
-                    bgMusicController.setVisible(true);
-                    soundController.setVisible(true);
+                    primaryStage.setScene(pauseScene);
+                    pauseRoot.getChildren().addAll(pauseMenu, pauseLabel, restartButton, homeButton, resumeButton, bgMusicSlider, saveMenu, saveButton, dontSaveButton, saveLabel);
                     System.out.println("Game paused");
                 }else{
                     isGamePaused = false;
                     engine.start();
-                    resumeButton.setVisible(false);
-                    restartButton.setVisible(false);
-                    homeButton.setVisible(false);
-                    pauseMenu.setVisible(false);
-                    pauseLabel.setVisible(false);
-                    bgMusicController.setVisible(false);
-                    soundController.setVisible(false);
                     System.out.println("Game resumed");
                 }
             });
@@ -454,19 +462,21 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                     restartGame();
                     engine = new GameEngine();
                     engine.setOnAction(Main.this);
-                    engine.setFps(120);
+                    engine.setFps(300);
                     engine.start();
                     load.setVisible(false);
                     newGame.setVisible(false);
                     settings.setVisible(false);
                     pause.setFocusTraversable(false);
                     pause.setVisible(true);
+                    quit.setVisible(false);
                 }
             });
 
             homeButton.setOnAction(event -> {
                 pauseLabel.setVisible(false);
                 pauseMenu.setVisible(false);
+                pause.setVisible(false);
                 restartButton.setVisible(false);
                 resumeButton.setVisible(false);
                 homeButton.setVisible(false);
@@ -474,8 +484,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 dontSaveButton.setVisible(true);
                 saveMenu.setVisible(true);
                 saveLabel.setVisible(true);
-                bgMusicController.setVisible(false);
-                soundController.setVisible(false);
+                bgMusicSlider.setVisible(false);
+                // soundController.setVisible(false);
             });
 
             dontSaveButton.setOnAction(event -> {
@@ -484,7 +494,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
             saveButton.setOnAction(event -> {
                 saveGame();
-                Platform.exit();
+                goHome();
             });
 
         countDownLabel = new Label("");
@@ -492,41 +502,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         countDownLabel.setStyle("-fx-font-size: 36px");
         countDownLabel.setTranslateX(sceneWidth / 2 - 20);
         countDownLabel.setTranslateY(sceneHeigt / 2);
-        
-
-
-        bgMusicController = new Slider(0, 1, 0.5);
-            bgMusicController.setOrientation(Orientation.HORIZONTAL);
-            bgMusicController.setPrefSize(250, 20);
-            bgMusicController.setTranslateX(150);
-            bgMusicController.setTranslateY(280);
-            bgMusicController.getStyleClass().add("custom-volume-slider"); 
-    
             
-            
-            bgMusicController.setVisible(false);
-            
-        soundController = new Slider(0, 1, 0.5);
-        soundController.setOrientation(Orientation.HORIZONTAL);
-        soundController.setPrefSize(250, 20);
-        soundController.setTranslateX(150);
-        soundController.setTranslateY(325);
-        soundController.getStyleClass().add("custom-volume-slider"); 
-
-        
-    
-        soundController.setVisible(false);
-        
-        bgMusicController.valueProperty().addListener((observable, oldValue, newValue) -> {
-            bgVol = newValue.doubleValue();
-            mediaPlayer.setVolume(bgVol);
-        });
-
-        // soundController.valueProperty().addListener((observable, oldValue, newValue) -> {
-        //     mediaPlayer.setVolume(newValue.doubleValue());
-        // });
-            
-        root = new Pane();
+        root = new Group();
         scoreLabel = new Label("SCORE: " + score);
         levelLabel = new Label("LEVEL: " + level);
         levelLabel.setTranslateY(30);
@@ -534,9 +511,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         heartLabel.setTranslateY(15);
         heartLabel.setTranslateX(sceneWidth - 55);
         if (loadFromSave == false) {
-            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, heartImageView, settings, pause, resumeButton, restartButton, homeButton, pauseMenu, pauseLabel, resumeButton2, settingLabel, saveButton, dontSaveButton, saveMenu, saveLabel, load, okButton, gameSavedLabel, countDownLabel, bgMusicController, soundController);
+            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, heartImageView, settings, pause, resumeButton2, settingLabel,countDownLabel, quit, load);
         } else {
-            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, heartImageView, settings, pause, resumeButton, restartButton, homeButton, pauseMenu, pauseLabel, resumeButton2, settingLabel, saveButton, dontSaveButton, saveMenu, saveLabel, load, bgMusicController, soundController);
+            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, heartImageView, settings, pause, resumeButton2, settingLabel, saveButton, dontSaveButton, saveMenu, saveLabel, quit, load);
         }
         // for (Block block : blocks) {
         //     root.getChildren().add(block.rect);
@@ -552,10 +529,14 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         primaryStage.setTitle("Game");
         primaryStage.setScene(scene);
+
         primaryStage.show();
 
-        //root.getChildren().addAll(bgMusicController, soundController);
-
+        resumeButton.setOnAction(event -> {
+            isGamePaused = false;
+            primaryStage.setScene(scene);
+            engine.start();
+        });
 
 
 
@@ -567,10 +548,12 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 newGame.setVisible(false);
                 settings.setVisible(false);
                 pause.setVisible(true);
+                quit.setVisible(false);
+                pause.setFocusTraversable(false);
                 
                 engine = new GameEngine();
                 engine.setOnAction(this);
-                engine.setFps(120);
+                engine.setFps(300);
                 engine.start();
             }
 
@@ -581,19 +564,17 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 @Override
                 public void handle(ActionEvent event) {
                     addBlocksToRoot();
-                    mediaPlayer.play();
 
                     engine = new GameEngine();
                     engine.setOnAction(Main.this);
-                    engine.setFps(120);
-                    engine.start();
+                    engine.setFps(300);
                     load.setVisible(false);
                     newGame.setVisible(false);
                     settings.setVisible(false);
+                    quit.setVisible(false);
                     pause.setFocusTraversable(false);
-                    pause.setVisible(true);
-                    //engine.stop();
-                    //countDownDisplay();
+                    pause.setVisible(false);
+                    countDownDisplay();
                 }
             });
         } else {
@@ -602,12 +583,13 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             load.setVisible(false);
             newGame.setVisible(false);
             settings.setVisible(false);
+            quit.setVisible(false);
             pause.setFocusTraversable(false);
             pause.setVisible(true);
 
             engine = new GameEngine();
             engine.setOnAction(this);
-            engine.setFps(120);
+            engine.setFps(300);
             engine.start();
             loadFromSave = false;
         }
@@ -621,28 +603,29 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
     }
 
-    // private void countDownDisplay() {
-    //     countDown = 3;
-    //     countDownLabel.setVisible(true);
+    private void countDownDisplay() {
+        countDown = 3;
+        countDownLabel.setVisible(true);
 
-    //     timeline = new Timeline(
-    //         new KeyFrame(Duration.seconds(1), new EventHandler<ActionEvent>() {
-    //             @Override
-    //             public void handle(ActionEvent event) {
-    //                 countDownLabel.setText(Integer.toString(countDown));
-    //                 countDown--;
+        timeline = new Timeline(
+            new KeyFrame(Duration.seconds(1), new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    countDownLabel.setText(Integer.toString(countDown));
+                    countDown--;
 
-    //                 if (countDown < 0) {
-    //                     countDownLabel.setVisible(false);
-    //                     timeline.stop();
-    //                     engine.start();
-    //                 }
-    //             }
-    //         })
-    // );
-    // timeline.setCycleCount(4); 
-    // timeline.play();
-    // }
+                    if (countDown < 0) {
+                        countDownLabel.setVisible(false);
+                        pause.setVisible(true);
+                        timeline.stop();
+                        engine.start();
+                    }
+                }
+            })
+    );
+    timeline.setCycleCount(4); 
+    timeline.play();
+    }
 
 
     private void initBoard() {
@@ -909,7 +892,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         if (destroyedBlockCount == blocks.size()) {
             //TODO win level todo...
             //System.out.println("You Win");
-
             nextLevel();
         }
     }
@@ -1095,6 +1077,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             blocks.clear();
             chocos.clear();
 
+            
             start(primaryStage);
             addBlocksToRoot();
         } catch (Exception e) {
