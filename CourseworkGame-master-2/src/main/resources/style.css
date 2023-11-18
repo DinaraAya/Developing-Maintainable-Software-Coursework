@@ -6,7 +6,17 @@
 
 .root {
     -fx-background-color:rgb(245, 227, 224);
-    -fx-background-image: url("background1.png");
+    -fx-background-image: url("/wall.png");
+}
+
+.settingRoot {
+    -fx-background-color:rgb(245, 227, 224);
+    -fx-background-image: url("wall.png");
+}
+
+.pauseRoot {
+    -fx-background-color:rgb(245, 227, 224);
+    -fx-background-image: url("wall.png");
 }
 
 .goldRoot {
