@@ -178,22 +178,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         initButtons();
         initLabels();
-
-
-            //heart ui
-            heartImageView = new ImageView(new Image("lives.png"));
-            heartImageView.setTranslateX(sceneWidth - 100);
-            heartImageView.setTranslateY(10);
-            heartImageView.setFitWidth(heartWidth);
-            heartImageView.setFitHeight(heartHeight);
-
-             //pause menu
-             Image pauseMenuImage = new Image("pauseMenu.png");
-             ImagePattern pauseMenuPattern = new ImagePattern(pauseMenuImage);
-             pauseMenu = new Rectangle(345, 130);
-             pauseMenu.setTranslateY(250);
-             pauseMenu.setTranslateX(75);
-             pauseMenu.setFill(pauseMenuPattern);
+        initImages();
 
 
             load.setOnAction(new EventHandler<ActionEvent>() {
@@ -249,12 +234,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
             
         root = new Pane();
-        scoreLabel = new Label("SCORE: " + score);
-        levelLabel = new Label("LEVEL: " + level);
-        levelLabel.setTranslateY(30);
-        heartLabel = new Label("X" + heart);
-        heartLabel.setTranslateY(15);
-        heartLabel.setTranslateX(sceneWidth - 55);
+
+
         if (loadFromSave == false) {
             root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, heartImageView, settings, pause, settingLabel, countDownLabel, quit, load);
         } else {
@@ -265,11 +246,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         Scene scene = new Scene(root, sceneWidth, sceneHeigt);
         scene.getStylesheets().add("style.css");
         scene.setOnKeyPressed(this);
-
-
-        scoreLabel.getStyleClass().add("text");
-        levelLabel.getStyleClass().add("text");
-        heartLabel.getStyleClass().add("text");
 
         primaryStage.setTitle("Game");
         primaryStage.setScene(scene);
@@ -395,9 +371,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     timeline.play();
     }
 
-
-
-
     private void initBoard() {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < level + 1; j++) {
@@ -433,15 +406,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         slideUp.play();
     }
 
-    
-    
-
 
     public static void main(String[] args) {
         launch(args);
     }
-
-
 
     @Override
     public void handle(KeyEvent event) {
@@ -630,8 +598,39 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         countDownLabel.setStyle("-fx-font-size: 36px");
         countDownLabel.setTranslateX(sceneWidth / 2 - 20);
         countDownLabel.setTranslateY(sceneHeigt / 2);
+
+        //score label
+        scoreLabel = new Label("SCORE: " + score);
+        scoreLabel.getStyleClass().add("text");
+        
+        //level label
+        levelLabel = new Label("LEVEL: " + level);
+        levelLabel.setTranslateY(30);
+        levelLabel.getStyleClass().add("text");
+        
+        //heart label
+        heartLabel = new Label("X" + heart);
+        heartLabel.setTranslateY(15);
+        heartLabel.setTranslateX(sceneWidth - 55);
+        heartLabel.getStyleClass().add("text");
     }
 
+    private void initImages(){
+        //heart ui
+        heartImageView = new ImageView(new Image("lives.png"));
+        heartImageView.setTranslateX(sceneWidth - 100);
+        heartImageView.setTranslateY(10);
+        heartImageView.setFitWidth(heartWidth);
+        heartImageView.setFitHeight(heartHeight);
+
+         //pause menu
+         Image pauseMenuImage = new Image("pauseMenu.png");
+         ImagePattern pauseMenuPattern = new ImagePattern(pauseMenuImage);
+         pauseMenu = new Rectangle(345, 130);
+         pauseMenu.setTranslateY(250);
+         pauseMenu.setTranslateX(75);
+         pauseMenu.setFill(pauseMenuPattern);
+    }
 
     private boolean goDownBall                  = true;
     private boolean goRightBall                 = true;
