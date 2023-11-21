@@ -1,26 +1,17 @@
 package brickGame;
 
-import javafx.stage.Modality;
-import javafx.stage.StageStyle;
 import javafx.util.Duration;
-
 import javafx.application.Application;
+import javafx.scene.Parent;
+import javafx.animation.TranslateTransition;  
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Orientation;
-import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
-import javafx.scene.control.TreeTableView.TreeTableViewFocusModel;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -28,26 +19,13 @@ import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
-
-import java.util.concurrent.DelayQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import javafx.scene.control.Slider;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
-
 import javafx.scene.media.*;
-import javafx.util.Duration;
-
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.util.Duration;
 
 
 
@@ -86,6 +64,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private boolean isExistHeartBlock = false;
 
     private Rectangle rect;
+    public Rectangle background;
     private Rectangle pauseMenu;
     private Rectangle saveMenu;
     private int       ballRadius = 10;
@@ -108,6 +87,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     public static String savePath    = "D:/save/save.mdds";
     public static String savePathDir = "D:/save/";
 
+
     private ArrayList<Block> blocks = new ArrayList<Block>();
     private ArrayList<Bonus> chocos = new ArrayList<Bonus>();
     private Color[]          colors = new Color[]{
@@ -125,8 +105,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             Color.TOMATO,
             Color.TAN,
     };
-    public  Group             root;
-    public  Group             pauseRoot;
+    
+    public  Pane             root;
+    public  Pane             pauseRoot;
+    public  Pane             settingRoot;
     private Label            scoreLabel;
     private Label            heartLabel;
     private Label            levelLabel;
@@ -144,6 +126,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private Timeline        timeline;
 
     private boolean loadFromSave = false;
+    private boolean gameInitialized = false;
 
     Stage  primaryStage;
     Button load    = null;
@@ -174,10 +157,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             bgMusicSlider = sliderManager.getBgMusicController();
         }
 
-
-
         this.primaryStage = primaryStage;
-
 
         if (loadFromSave == false) {
             System.out.println("Starting new");
@@ -190,48 +170,36 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 return;
             }
 
-
             initBall();
             initBreak();
             initBoard();
 
+        }
 
-            }
+        initButtons();
+        initLabels();
 
 
-            load = new Button("LOAD GAME");
-            load.setId("button");
-            newGame = new Button("NEW GAME");
-            newGame.setId("button");
-            settings = new Button("SETTINGS");
-            settings.setId("button");
-            pause = new Button();
-            pause.setId("pause-button");
-            quit = new Button("QUIT");
-            quit.setId("button");
+            //heart ui
+            heartImageView = new ImageView(new Image("lives.png"));
+            heartImageView.setTranslateX(sceneWidth - 100);
+            heartImageView.setTranslateY(10);
+            heartImageView.setFitWidth(heartWidth);
+            heartImageView.setFitHeight(heartHeight);
 
-            Image pauseImage = new Image("pauseButton.png");
-            ImageView pauseView = new ImageView(pauseImage);
+             //pause menu
+             Image pauseMenuImage = new Image("pauseMenu.png");
+             ImagePattern pauseMenuPattern = new ImagePattern(pauseMenuImage);
+             pauseMenu = new Rectangle(345, 130);
+             pauseMenu.setTranslateY(250);
+             pauseMenu.setTranslateX(75);
+             pauseMenu.setFill(pauseMenuPattern);
 
-            pause.setTranslateX(sceneWidth - 280);
-            pause.setTranslateY(5);
-
-            pause.setPrefSize(55, 45);
-            pause.setGraphic(pauseView);
-            pause.setVisible(false);
-
-            load.setPrefSize(200, 50);
-
-            load.setTranslateX(145);
-            load.setTranslateY(430); 
-            load.setVisible(true);
 
             load.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
                     loadGame();
-                    //engine.stop();
-                    //countDownDisplay();
                     load.setVisible(false);
                     newGame.setVisible(false);
                     pause.setVisible(true);
@@ -239,221 +207,27 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 }
             });
 
-            newGame.setPrefWidth(200);
-            newGame.setPrefHeight(50);
+
+            quit.setOnAction(event-> {
+                Platform.exit();
+            });
 
 
-            newGame.setTranslateX(145);
-            newGame.setTranslateY(250);
-
-
-            settings.setPrefHeight(50);
-            settings.setPrefWidth(200);
-
-            settings.setTranslateX(145);
-            settings.setTranslateY(310);
-
-            quit.setPrefHeight(50);
-            quit.setPrefWidth(200);
-
-            quit.setTranslateX(145);
-            quit.setTranslateY(370);
-
-
-            Image resumeImage = new Image("resume1.png");
-            ImageView resumeView = new ImageView(resumeImage);
-
-            resumeButton = new Button("");
-            resumeButton.setGraphic(resumeView);
-
-
-            resumeButton.setId("pause-button");
-
-
-        resumeButton.setPrefSize(75, 65);
-
-        resumeButton.setTranslateX(210);
-        resumeButton.setTranslateY(400);
-
-        // resumeButton.setVisible(false);
-
-
-            resumeButton2 = new Button("");
-            resumeButton2.setId("pause-button");
-            
-            Image resumeButton2Image = new Image("resume1.png");
-            ImageView resumeButton2ImageView = new ImageView(resumeButton2Image);
-
-
-        resumeButton2.setPrefSize(75, 65);
-        resumeButton2.setTranslateX(210);
-        resumeButton2.setTranslateY(400);
-
-        resumeButton2.setGraphic(resumeButton2ImageView);
-        resumeButton2.setVisible(false);
-        
-
-        resumeButton2.setOnAction(event -> {
-            pauseMenu.setVisible(false);
-            resumeButton2.setVisible(false);
-            newGame.setVisible(true);
-            settings.setVisible(true);
-            quit.setVisible(true);
-            settingLabel.setVisible(false);
-            load.setVisible(true);
-            bgMusicSlider.setVisible(false);
-            // soundController.setVisible(false);
-        }); 
-
-        Image restartButtonImage = new Image("restart.png");
-        ImageView restartButtonView = new ImageView(restartButtonImage);
-
-        restartButton = new Button("");
-        restartButton.setId("pause-button");
-
-        restartButton.setPrefSize(65, 55);
-        restartButton.setTranslateX(110);
-        restartButton.setTranslateY(405);
-
-        restartButton.setGraphic(restartButtonView);
-        // restartButton.setVisible(false);
-
-        Image homeButtonImage = new Image("homeButton.png");
-        ImageView homeButtonView = new ImageView(homeButtonImage);
-
-        homeButton = new Button("");
-        homeButton.setId("pause-button");
-        
-        homeButton.setPrefSize(65, 55);
-        homeButton.setTranslateX(320);
-        homeButton.setTranslateY(405);
-
-        homeButton.setGraphic(homeButtonView);
-        // homeButton.setVisible(false);
-
-        pauseMenu = new Rectangle(345, 130);
-        pauseMenu.setTranslateY(250);
-        pauseMenu.setTranslateX(75);
-
-        Image pauseMenuImage = new Image("pauseMenu.png");
-        ImagePattern pauseMenuPattern = new ImagePattern(pauseMenuImage);
-
-        pauseMenu.setFill(pauseMenuPattern);
-        // pauseMenu.setVisible(false);
-
-        pauseLabel = new Label("PAUSE");
-        pauseLabel.getStyleClass().add("bigText");
-        pauseLabel.setStyle("-fx-font-size: 24px");
-
-        pauseLabel.setTranslateX(180);
-        pauseLabel.setTranslateY(200);
-        // pauseLabel.setVisible(false);
-
-        settingLabel = new Label("SETTING");
-        settingLabel.getStyleClass().add("bigText");
-        settingLabel.setStyle("-fx-font-size: 24px");
-
-        settingLabel.setTranslateX(158);
-        settingLabel.setTranslateY(200);
-        settingLabel.setVisible(false);
-
-        saveMenu = new Rectangle(345, 130);
-        saveMenu.setTranslateX(75);
-        saveMenu.setTranslateY(250);
-
-        Image saveMenuImage = new Image("saveMenu.png");
-        ImagePattern saveMenuPattern = new ImagePattern(saveMenuImage);
-
-        saveMenu.setFill(saveMenuPattern);
-        saveMenu.setVisible(false);
-
-        saveLabel = new Label("DO YOU WANT TO SAVE GAME ?");
-        saveLabel.setTranslateX(85);
-        saveLabel.setTranslateY(300);
-        saveLabel.getStyleClass().add("text");
-        saveLabel.setVisible(false);
-
-        gameSavedLabel = new Label("GAME SAVED");
-        gameSavedLabel.getStyleClass().add("bigText");
-        gameSavedLabel.setStyle("-fx-font-size: 36px");
-        gameSavedLabel.setTranslateX(60);
-        gameSavedLabel.setTranslateY(300);
-        gameSavedLabel.setVisible(false);
-        
-
-        saveButton = new Button("YES");
-        saveButton.setId("button");
-
-        saveButton.setPrefWidth(200);
-        saveButton.setPrefHeight(50);
-
-        saveButton.setTranslateX(145);
-        saveButton.setTranslateY(400);
-        saveButton.setVisible(false);
-
-        dontSaveButton = new Button("NO");
-        dontSaveButton.setId("button");
-
-        dontSaveButton.setPrefWidth(200);
-        dontSaveButton.setPrefHeight(50);
-
-        dontSaveButton.setTranslateX(145);
-        dontSaveButton.setTranslateY(470);
-        dontSaveButton.setVisible(false);
-
-        okButton = new Button("OK");
-        okButton.setId("button");
-
-        okButton.setPrefWidth(200);
-        okButton.setPrefHeight(50);
-
-        okButton.setTranslateX(145);
-        okButton.setTranslateY(400);
-        okButton.setVisible(false);
-
-
-
-        settings.setOnAction(event -> {
-            pauseMenu.setVisible(true);
-            resumeButton2.setVisible(true);
-            settings.setVisible(false);
-            quit.setVisible(false);
-            settingLabel.setVisible(true);
-            load.setVisible(false);
-            bgMusicSlider.setVisible(true);
-            // soundController.setVisible(true);
-        });
-
-
-        quit.setOnAction(event-> {
-            Platform.exit();
-        });
-
-            heartImageView = new ImageView(new Image("lives.png"));
-            heartImageView.setTranslateX(sceneWidth - 100);
-            heartImageView.setTranslateY(10);
-            
-            heartImageView.setFitWidth(heartWidth);
-            heartImageView.setFitHeight(heartHeight);
-
-            pauseRoot = new Group();
+            pauseRoot = new Pane();
             Scene pauseScene = new Scene(pauseRoot, sceneWidth, sceneHeigt);
             pauseScene.getStylesheets().add("style.css");
 
+            settingRoot = new Pane();
+            Scene settingScene = new Scene(settingRoot, sceneWidth, sceneHeigt);
+            settingScene.getStylesheets().add("style.css");
+            settingRoot.getChildren().addAll(pauseMenu, bgMusicSlider, resumeButton2, settingLabel);
 
-            pause.setOnAction(event -> {
-                if(!isGamePaused) {
-                    isGamePaused = true;
-                    engine.stop();
-                    primaryStage.setScene(pauseScene);
-                    pauseRoot.getChildren().addAll(pauseMenu, pauseLabel, restartButton, homeButton, resumeButton, bgMusicSlider, saveMenu, saveButton, dontSaveButton, saveLabel);
-                    System.out.println("Game paused");
-                }else{
-                    isGamePaused = false;
-                    engine.start();
-                    System.out.println("Game resumed");
-                }
+            settings.setOnAction(event -> {
+                slideUpAnimation(settingRoot);
+                primaryStage.setScene(settingScene);
+                settingRoot.getChildren().addAll(pauseMenu, bgMusicSlider, resumeButton2, settingLabel);
             });
+
 
             restartButton.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
@@ -473,37 +247,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 }
             });
 
-            homeButton.setOnAction(event -> {
-                pauseLabel.setVisible(false);
-                pauseMenu.setVisible(false);
-                pause.setVisible(false);
-                restartButton.setVisible(false);
-                resumeButton.setVisible(false);
-                homeButton.setVisible(false);
-                saveButton.setVisible(true);
-                dontSaveButton.setVisible(true);
-                saveMenu.setVisible(true);
-                saveLabel.setVisible(true);
-                bgMusicSlider.setVisible(false);
-                // soundController.setVisible(false);
-            });
-
-            dontSaveButton.setOnAction(event -> {
-                 goHome();
-             });
-
-            saveButton.setOnAction(event -> {
-                saveGame();
-                goHome();
-            });
-
-        countDownLabel = new Label("");
-        countDownLabel.getStyleClass().add("bigText");
-        countDownLabel.setStyle("-fx-font-size: 36px");
-        countDownLabel.setTranslateX(sceneWidth / 2 - 20);
-        countDownLabel.setTranslateY(sceneHeigt / 2);
             
-        root = new Group();
+        root = new Pane();
         scoreLabel = new Label("SCORE: " + score);
         levelLabel = new Label("LEVEL: " + level);
         levelLabel.setTranslateY(30);
@@ -511,13 +256,12 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         heartLabel.setTranslateY(15);
         heartLabel.setTranslateX(sceneWidth - 55);
         if (loadFromSave == false) {
-            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, heartImageView, settings, pause, resumeButton2, settingLabel,countDownLabel, quit, load);
+            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, heartImageView, settings, pause, settingLabel, countDownLabel, quit, load);
         } else {
-            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, heartImageView, settings, pause, resumeButton2, settingLabel, saveButton, dontSaveButton, saveMenu, saveLabel, quit, load);
+            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, heartImageView, settings, pause, settingLabel, quit, load);
         }
-        // for (Block block : blocks) {
-        //     root.getChildren().add(block.rect);
-        // }
+
+
         Scene scene = new Scene(root, sceneWidth, sceneHeigt);
         scene.getStylesheets().add("style.css");
         scene.setOnKeyPressed(this);
@@ -534,8 +278,34 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         resumeButton.setOnAction(event -> {
             isGamePaused = false;
+            pauseRoot.getChildren().removeAll(pauseMenu, pauseLabel, restartButton, homeButton, resumeButton, bgMusicSlider);
             primaryStage.setScene(scene);
             engine.start();
+        });
+
+        homeButton.setOnAction(event -> {
+            primaryStage.setScene(scene);
+            goHome();
+        });
+
+        resumeButton2.setOnAction(event -> {
+            primaryStage.setScene(scene);
+        }); 
+
+        pause.setOnAction(event -> {
+            if(!isGamePaused) {
+                isGamePaused = true;
+                engine.stop();
+                pauseRoot.getChildren().addAll(pauseMenu, pauseLabel, restartButton, homeButton, resumeButton, bgMusicSlider);
+                slideUpAnimation(pauseRoot);
+                primaryStage.setScene(pauseScene);
+                System.out.println("Game paused");
+            }else{
+                isGamePaused = false;
+                primaryStage.setScene(scene);
+                engine.start();
+                System.out.println("Game resumed");
+            }
         });
 
 
@@ -568,25 +338,23 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                     engine = new GameEngine();
                     engine.setOnAction(Main.this);
                     engine.setFps(300);
+                    pause.setVisible(false);
                     load.setVisible(false);
                     newGame.setVisible(false);
                     settings.setVisible(false);
                     quit.setVisible(false);
                     pause.setFocusTraversable(false);
-                    pause.setVisible(false);
                     countDownDisplay();
                 }
             });
         } else {
             addBlocksToRoot();
-
             load.setVisible(false);
             newGame.setVisible(false);
             settings.setVisible(false);
             quit.setVisible(false);
             pause.setFocusTraversable(false);
             pause.setVisible(true);
-
             engine = new GameEngine();
             engine.setOnAction(this);
             engine.setFps(300);
@@ -628,6 +396,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
 
+
+
     private void initBoard() {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < level + 1; j++) {
@@ -656,6 +426,14 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
     }
 
+    private void slideUpAnimation(Parent root) {
+        TranslateTransition slideUp = new TranslateTransition(Duration.seconds(0.5), root);
+        slideUp.setFromY(sceneHeigt);
+        slideUp.setToY(0);
+        slideUp.play();
+    }
+
+    
     
 
 
@@ -738,6 +516,120 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         ImagePattern pattern = new ImagePattern(new Image("ground.png"));
 
         rect.setFill(pattern);
+    }
+
+    private void initButtons(){
+        //load button
+        load = new Button("LOAD GAME");
+        load.setId("button");
+        load.setPrefSize(200, 50);
+        load.setTranslateX(145);
+        load.setTranslateY(430); 
+        load.setVisible(true);
+
+        //new game button
+        newGame = new Button("NEW GAME");
+        newGame.setId("button");
+        newGame.setPrefWidth(200);
+        newGame.setPrefHeight(50);
+        newGame.setTranslateX(145);
+        newGame.setTranslateY(250);
+
+
+        //settings button
+        settings = new Button("SETTINGS");
+        settings.setId("button");
+        settings.setPrefHeight(50);
+        settings.setPrefWidth(200);
+        settings.setTranslateX(145);
+        settings.setTranslateY(310);
+
+
+        //pause button
+        Image pauseImage = new Image("pauseButton.png");
+        ImageView pauseView = new ImageView(pauseImage);
+        pause = new Button();
+        pause.setId("pause-button");
+        pause.setTranslateX(sceneWidth - 280);
+        pause.setTranslateY(5);
+        pause.setPrefSize(55, 45);
+        pause.setGraphic(pauseView);
+        pause.setVisible(false);
+
+
+        //quit button
+        quit = new Button("QUIT");
+        quit.setId("button");
+        quit.setPrefHeight(50);
+        quit.setPrefWidth(200);
+        quit.setTranslateX(145);
+        quit.setTranslateY(370);
+
+
+         //resume button from pause menu
+         Image resumeImage = new Image("resume1.png");
+         ImageView resumeView = new ImageView(resumeImage);
+         resumeButton = new Button("");
+         resumeButton.setGraphic(resumeView);
+         resumeButton.setId("pause-button");
+         resumeButton.setPrefSize(75, 65);
+         resumeButton.setTranslateX(210);
+         resumeButton.setTranslateY(400);
+
+         //resume button from settings
+         Image resumeButton2Image = new Image("resume1.png");
+         ImageView resumeButton2ImageView = new ImageView(resumeButton2Image);
+         resumeButton2 = new Button("");
+         resumeButton2.setId("pause-button");
+         resumeButton2.setPrefSize(75, 65);
+         resumeButton2.setTranslateX(210);
+         resumeButton2.setTranslateY(400);
+         resumeButton2.setGraphic(resumeButton2ImageView);
+
+         //restart button 
+         Image restartButtonImage = new Image("restart.png");
+         ImageView restartButtonView = new ImageView(restartButtonImage);
+         restartButton = new Button("");
+         restartButton.setId("pause-button");
+         restartButton.setPrefSize(65, 55);
+         restartButton.setTranslateX(110);
+         restartButton.setTranslateY(405);
+         restartButton.setGraphic(restartButtonView);
+         
+         
+         //home button
+         Image homeButtonImage = new Image("homeButton.png");
+         ImageView homeButtonView = new ImageView(homeButtonImage);
+         homeButton = new Button("");
+         homeButton.setId("pause-button");
+         homeButton.setPrefSize(65, 55);
+         homeButton.setTranslateX(320);
+         homeButton.setTranslateY(405);
+         homeButton.setGraphic(homeButtonView);
+    }
+
+    private void initLabels(){
+        //pause label
+         pauseLabel = new Label("PAUSE");
+         pauseLabel.getStyleClass().add("bigText");
+         pauseLabel.setStyle("-fx-font-size: 24px");
+         pauseLabel.setTranslateX(180);
+         pauseLabel.setTranslateY(200);
+         
+        //setting label
+        settingLabel = new Label("SETTING");
+        settingLabel.getStyleClass().add("bigText");
+        settingLabel.setStyle("-fx-font-size: 24px");
+        settingLabel.setTranslateX(158);
+        settingLabel.setTranslateY(200);
+        settingLabel.setVisible(false);
+        
+        //countdown label(3,2,1)
+        countDownLabel = new Label("");
+        countDownLabel.getStyleClass().add("bigText");
+        countDownLabel.setStyle("-fx-font-size: 36px");
+        countDownLabel.setTranslateX(sceneWidth / 2 - 20);
+        countDownLabel.setTranslateY(sceneHeigt / 2);
     }
 
 
@@ -1188,8 +1080,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             }
         }
     }
-
-
     @Override
     public void onInit() {
 
