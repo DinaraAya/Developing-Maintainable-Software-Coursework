@@ -109,6 +109,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     public  Pane             root;
     public  Pane             pauseRoot;
     public  Pane             settingRoot;
+    public  Pane             gameOverRoot;
     private Label            scoreLabel;
     private Label            heartLabel;
     private Label            levelLabel;
@@ -121,6 +122,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     private Scene settingScene;
     private Scene pauseScene;
+    private Scene gameOverScene;
     private Scene scene;
 
 
@@ -288,7 +290,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 } else {
                     type = Block.BLOCK_NORMAL;
                 }
-                blocks.add(new Block(j, i, colors[r % (colors.length)], type));
+                blocks.add(new Block(j, i, type));  //peepee
                 //System.out.println("colors " + r % (colors.length));
             }
         }
@@ -308,6 +310,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     @Override
     public void handle(KeyEvent event) {
+        if(event!=null) {
             switch (event.getCode()) {
                 case LEFT:
                     move(LEFT);
@@ -323,6 +326,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                     saveGame();
                     break;
             }
+        }
         }
 
     float oldXBreak;
@@ -523,6 +527,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         settingScene.getStylesheets().add("style.css");
         settingRoot.getChildren().addAll(pauseMenu, bgMusicSlider, resumeButton2, settingLabel);
 
+        gameOverRoot = new Pane();
+        gameOverScene = new Scene(gameOverRoot, sceneWidth, sceneHeigt);
+        gameOverScene.getStylesheets().add("style.css");
+
         root = new Pane();
         if (loadFromSave == false) {
             root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, heartImageView, settings, pause, settingLabel, countDownLabel, quit, load);
@@ -674,7 +682,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 new Score().show(sceneWidth / 2, sceneHeigt / 2, -1, this);
 
                 if (heart == 0) {
-                    new Score().showGameOver(this);
+                    new Score().showGameOver(this, score);
+                    primaryStage.setScene(gameOverScene);
                     engine.stop();
                 }
 
@@ -880,7 +889,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         for (BlockSerializable ser : loadSave.blocks) {
             int r = new Random().nextInt(200);
-            blocks.add(new Block(ser.row, ser.j, colors[r % colors.length], ser.type));
+            blocks.add(new Block(ser.row, ser.j, ser.type));
         }
 
 
@@ -1104,4 +1113,5 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     public void onTime(long time) {
         this.time = time;
     }
+    
 }
