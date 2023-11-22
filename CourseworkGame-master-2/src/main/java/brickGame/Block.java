@@ -9,7 +9,7 @@ import javafx.scene.shape.Rectangle;
 import java.io.Serializable;
 
 public class Block implements Serializable {
-    private static Block block = new Block(-1, -1, Color.TRANSPARENT, 99);
+    private static Block block = new Block(-1, -1, 99);
 
     public int row;
     public int column;
@@ -17,7 +17,6 @@ public class Block implements Serializable {
 
     public boolean isDestroyed = false;
 
-    private Color color;
     public int type;
 
     public int x;
@@ -44,10 +43,9 @@ public class Block implements Serializable {
     public static int BLOCK_HEART = 102;
 
 
-    public Block(int row, int column, Color color, int type) {
+    public Block(int row, int column, int type) {
         this.row = row;
         this.column = column;
-        this.color = color;
         this.type = type;
 
         draw();
@@ -76,9 +74,10 @@ public class Block implements Serializable {
             ImagePattern pattern = new ImagePattern(image);
             rect.setFill(pattern);
         } else {
-            rect.setFill(color);
+            Image image = new Image("game_block.png");
+            ImagePattern pattern = new ImagePattern(image);
+            rect.setFill(pattern);
         }
-
     }
 
 
