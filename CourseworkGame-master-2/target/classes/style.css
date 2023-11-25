@@ -20,6 +20,10 @@
     -fx-background-color: #4b4a08;
 }
 
+.gameOverRoot {
+    -fx-background-image: url("wall.png");
+}
+
 .text {
     -fx-font-family: 'Press Start 2P';
     -fx-text-fill: rgb(203, 67, 142);

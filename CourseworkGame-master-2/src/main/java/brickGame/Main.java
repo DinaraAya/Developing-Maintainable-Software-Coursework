@@ -143,6 +143,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     Button restartButton = null;
     Button homeButton = null;
 
+
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         bgMusicManager = BgMusicManager.getInstance();
@@ -202,18 +204,18 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                     
                 engine = new GameEngine();
                 engine.setOnAction(this);
-                engine.setFps(300);
+                engine.setFps(150);
                 engine.start();
             }
-
+ 
         newGame.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 addBlocksToRoot();
                 engine = new GameEngine();
                 engine.setOnAction(Main.this);
-                engine.setFps(300);
-                pause.setVisible(false);
+                engine.setFps(150);
+                root.getChildren().removeAll(pause, load, newGame, settings, quit);
                 load.setVisible(false);
                 newGame.setVisible(false);
                 settings.setVisible(false);
@@ -232,7 +234,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             pause.setVisible(true);
             engine = new GameEngine();
             engine.setOnAction(this);
-            engine.setFps(300);
+            engine.setFps(150);
             engine.start();
             loadFromSave = false;
         }
@@ -257,9 +259,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
                     if (countDown < 0) {
                         countDownLabel.setVisible(false);
-                        pause.setVisible(true);
                         timeline.stop();
                         engine.start();
+                        root.getChildren().add(pause);
                     }
                 }
             })
@@ -325,6 +327,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 case S:
                     saveGame();
                     break;
+                default:
             }
         }
         }
@@ -415,7 +418,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         pause.setTranslateY(5);
         pause.setPrefSize(55, 45);
         pause.setGraphic(pauseView);
-        pause.setVisible(false);
+        pause.setVisible(true);
 
         quit = new Button("QUIT");
         quit.setId("button");
@@ -533,7 +536,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         root = new Pane();
         if (loadFromSave == false) {
-            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, heartImageView, settings, pause, settingLabel, countDownLabel, quit, load);
+            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, heartImageView, settings, settingLabel, countDownLabel, quit, load);
         } else {
             root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, heartImageView, settings, pause, settingLabel, quit, load);
         }
@@ -570,7 +573,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 restartGame();
                 engine = new GameEngine();
                 engine.setOnAction(Main.this);
-                engine.setFps(300);
+                engine.setFps(150);
                 engine.start();
                 load.setVisible(false);
                 newGame.setVisible(false);
@@ -1021,14 +1024,21 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         if (yBall >= Block.getPaddingTop() && yBall <= (Block.getHeight() * (level + 1)) + Block.getPaddingTop()) {
             for (final Block block : blocks) {
                 int hitCode = block.checkHitToBlock(xBall, yBall);
-                if (hitCode != Block.NO_HIT) {
+                if (hitCode != Block.NO_HIT && !block.isDestroyed) {
+                    
                     score += 1;
 
                     new Score().show(block.x, block.y, 1, this);
 
-                    block.rect.setVisible(false);
-                    block.isDestroyed = true;
-                    destroyedBlockCount++;
+                    block.onHit();
+
+                    // block.rect.setVisible(false);
+                    // block.isDestroyed = true;
+                
+                    if(block.isDestroyed) {
+                        destroyedBlockCount++;
+                    }
+
                     //System.out.println("size is " + blocks.size());
                     resetColideFlags();
 

@@ -148,13 +148,13 @@ public class Score {
             Label score1 = new Label(String.valueOf(score));
             score1.getStyleClass().add("bigText");
             score1.setStyle("-fx-font-size: 36px");
-            score1.setTranslateX(105);
+            score1.setTranslateX(95);
             score1.setTranslateY(310);
 
             Label score2 = new Label(String.valueOf(highestScore));
             score2.getStyleClass().add("bigText");
             score2.setStyle("-fx-font-size: 36px");
-            score2.setTranslateX(310);
+            score2.setTranslateX(290);
             score2.setTranslateY(310);
 
             Label ScoreLabel = new Label("BEST");

@@ -1,21 +1,18 @@
-
 @font-face {
     font-family: 'Press Start 2P';
     src: url("font/PressStart2P-Regular.ttf");
 }
 
 .root {
-    -fx-background-color:rgb(245, 227, 224);
-    -fx-background-image: url("/wall.png");
+    -fx-background-image: url("wall.png");
 }
 
+
 .settingRoot {
-    -fx-background-color:rgb(245, 227, 224);
     -fx-background-image: url("wall.png");
 }
 
 .pauseRoot {
-    -fx-background-color:rgb(245, 227, 224);
     -fx-background-image: url("wall.png");
 }
 
@@ -23,6 +20,9 @@
     -fx-background-color: #4b4a08;
 }
 
+.gameOverRoot {
+    -fx-background-image: url("wall.png");
+}
 
 .text {
     -fx-font-family: 'Press Start 2P';
@@ -38,7 +38,6 @@
     -fx-font-size: 24px;
 }
 
-
 .button {
     -fx-background-image: url("button.png");
     -fx-text-fill: rgb(255, 255, 255);
@@ -49,7 +48,6 @@
     -fx-background-insets: 0;
 }
 
-
 .custom-volume-slider .track {
     -fx-padding: 8;
     -fx-border-width: 3;
@@ -59,6 +57,6 @@
 
 .custom-volume-slider .thumb {
     -fx-padding: 15;
-    -fx-background-radius: 0; /* Adjust the roundness of the thumb */
+    -fx-background-radius: 0; 
     -fx-background-image: url("thumb.png");
 }
