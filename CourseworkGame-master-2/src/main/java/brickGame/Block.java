@@ -42,6 +42,30 @@ public class Block implements Serializable {
     public static int BLOCK_STAR = 101;
     public static int BLOCK_HEART = 102;
 
+    private static final long COOLDOWN_DURATION = 200; 
+    private int hitCount = 0; 
+    private long lastHitTime = 0;
+
+    public void onHit() {
+        long currentTime = System.currentTimeMillis();
+
+        if(currentTime - lastHitTime < COOLDOWN_DURATION){
+            return;
+        }
+
+        lastHitTime = currentTime;
+        hitCount++;
+
+        if (hitCount == 1) {
+            Image crackedImage = new Image("cracked_bloc.png");
+            ImagePattern crackedPattern = new ImagePattern(crackedImage);
+            rect.setFill(crackedPattern);
+        }else if(hitCount >= 2) {
+            isDestroyed = true;
+            rect.setVisible(false);
+        }
+    }
+
 
     public Block(int row, int column, int type) {
         this.row = row;
@@ -62,15 +86,15 @@ public class Block implements Serializable {
         rect.setY(y);
 
         if (type == BLOCK_CHOCO) {
-            Image image = new Image("choco.jpg");
+            Image image = new Image("choco_block.png");
             ImagePattern pattern = new ImagePattern(image);
             rect.setFill(pattern);
         } else if (type == BLOCK_HEART) {
-            Image image = new Image("heart.jpg");
+            Image image = new Image("heart_block.png");
             ImagePattern pattern = new ImagePattern(image);
             rect.setFill(pattern);
         } else if (type == BLOCK_STAR) {
-            Image image = new Image("star.jpg");
+            Image image = new Image("gold_block.png");
             ImagePattern pattern = new ImagePattern(image);
             rect.setFill(pattern);
         } else {

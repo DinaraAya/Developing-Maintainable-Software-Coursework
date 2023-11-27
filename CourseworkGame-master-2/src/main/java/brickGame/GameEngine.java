@@ -1,5 +1,7 @@
 package brickGame;
 
+import javafx.application.Platform;
+
 
 public class GameEngine {
 
@@ -42,22 +44,20 @@ public class GameEngine {
     }
 
     private synchronized void PhysicsCalculation() {
-        physicsThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (!physicsThread.isInterrupted()) {
-                    try {
+        physicsThread = new Thread(() -> {
+            while (!physicsThread.isInterrupted()) {
+                try {
+                    Platform.runLater(() -> {
                         onAction.onPhysicsUpdate();
-                        Thread.sleep(fps);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    });
+                    Thread.sleep(fps);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         });
-
+    
         physicsThread.start();
-
     }
 
     public void start() {

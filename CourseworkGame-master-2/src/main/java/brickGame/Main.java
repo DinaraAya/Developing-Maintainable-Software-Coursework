@@ -32,6 +32,7 @@ import javafx.animation.Timeline;
 public class Main extends Application implements EventHandler<KeyEvent>, GameEngine.OnAction {
     private BgMusicManager bgMusicManager;
     private SliderManager sliderManager;
+    private UIHandler uiHandler;
 
     private boolean isGamePaused = false;
     private ImageView heartImageView;
@@ -147,6 +148,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        uiHandler = new UIHandler(primaryStage, heart, level, score);
+
         bgMusicManager = BgMusicManager.getInstance();
         if (!bgMusicManager.isPlaying()) {
             bgMusicManager.initialize("/bgMusic.mp3");
@@ -177,10 +180,12 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         }
 
-        initButtons();
-        initLabels();
+        // uiHandler.getButton(load).setOnAction(null);
+
+        // initLabels();
         initImages();
         initRoots();
+        initScene();
 
         scene = new Scene(root, sceneWidth, sceneHeigt);
         scene.getStylesheets().add("style.css");
@@ -194,47 +199,35 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         if (loadFromSave == false) {
             if (level > 1 && level < 18) {
                 addBlocksToRoot();
-
-                load.setVisible(false);
-                newGame.setVisible(false);
-                settings.setVisible(false);
-                pause.setVisible(true);
-                quit.setVisible(false);
                 pause.setFocusTraversable(false);
-                    
+                root.getChildren().removeAll(uiHandler.getButton(pause), uiHandler.getButton(load), uiHandler.getButton(newGame), uiHandler.getButton(settings), uiHandler.getButton(quit));
+                root.getChildren().add(uiHandler.getButton(pause));  
                 engine = new GameEngine();
                 engine.setOnAction(this);
-                engine.setFps(150);
+                engine.setFps(250);
                 engine.start();
             }
  
-        newGame.setOnAction(new EventHandler<ActionEvent>() {
+        uiHandler.getButton(newGame).setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 addBlocksToRoot();
                 engine = new GameEngine();
                 engine.setOnAction(Main.this);
-                engine.setFps(150);
-                root.getChildren().removeAll(pause, load, newGame, settings, quit);
-                load.setVisible(false);
-                newGame.setVisible(false);
-                settings.setVisible(false);
-                quit.setVisible(false);
+                engine.setFps(250);
+                root.getChildren().removeAll(uiHandler.getButton(pause), uiHandler.getButton(newGame), uiHandler.getButton(load), uiHandler.getButton(settings), uiHandler.getButton(quit));
                 pause.setFocusTraversable(false);
                 countDownDisplay();
             }
         });
         } else {
             addBlocksToRoot();
-            load.setVisible(false);
-            newGame.setVisible(false);
-            settings.setVisible(false);
-            quit.setVisible(false);
+            root.getChildren().removeAll(uiHandler.getButton(load), uiHandler.getButton(newGame), uiHandler.getButton(settings), uiHandler.getButton(quit));
             pause.setFocusTraversable(false);
             pause.setVisible(true);
             engine = new GameEngine();
             engine.setOnAction(this);
-            engine.setFps(150);
+            engine.setFps(250);
             engine.start();
             loadFromSave = false;
         }
@@ -261,7 +254,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                         countDownLabel.setVisible(false);
                         timeline.stop();
                         engine.start();
-                        root.getChildren().add(pause);
+                        root.getChildren().add(uiHandler.getButton(pause));
                     }
                 }
             })
@@ -292,7 +285,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 } else {
                     type = Block.BLOCK_NORMAL;
                 }
-                blocks.add(new Block(j, i, type));  //peepee
+                blocks.add(new Block(j, i, type));
                 //System.out.println("colors " + r % (colors.length));
             }
         }
@@ -388,82 +381,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         rect.setFill(pattern);
     }
 
-    private void initButtons(){
-        load = new Button("LOAD GAME");
-        load.setId("button");
-        load.setPrefSize(200, 50);
-        load.setTranslateX(145);
-        load.setTranslateY(430); 
-        load.setVisible(true);
-
-        newGame = new Button("NEW GAME");
-        newGame.setId("button");
-        newGame.setPrefWidth(200);
-        newGame.setPrefHeight(50);
-        newGame.setTranslateX(145);
-        newGame.setTranslateY(250);
-
-        settings = new Button("SETTINGS");
-        settings.setId("button");
-        settings.setPrefHeight(50);
-        settings.setPrefWidth(200);
-        settings.setTranslateX(145);
-        settings.setTranslateY(310);
-
-        Image pauseImage = new Image("pauseButton.png");
-        ImageView pauseView = new ImageView(pauseImage);
-        pause = new Button();
-        pause.setId("pause-button");
-        pause.setTranslateX(sceneWidth - 280);
-        pause.setTranslateY(5);
-        pause.setPrefSize(55, 45);
-        pause.setGraphic(pauseView);
-        pause.setVisible(true);
-
-        quit = new Button("QUIT");
-        quit.setId("button");
-        quit.setPrefHeight(50);
-        quit.setPrefWidth(200);
-        quit.setTranslateX(145);
-        quit.setTranslateY(370);
-
-        Image resumeImage = new Image("resume1.png");
-        ImageView resumeView = new ImageView(resumeImage);
-        resumeButton = new Button("");
-        resumeButton.setGraphic(resumeView);
-        resumeButton.setId("pause-button");
-        resumeButton.setPrefSize(75, 65);
-        resumeButton.setTranslateX(210);
-        resumeButton.setTranslateY(400);
-
-        Image resumeButton2Image = new Image("resume1.png");
-        ImageView resumeButton2ImageView = new ImageView(resumeButton2Image);
-        resumeButton2 = new Button("");
-        resumeButton2.setId("pause-button");
-        resumeButton2.setPrefSize(75, 65);
-        resumeButton2.setTranslateX(210);
-        resumeButton2.setTranslateY(400);
-        resumeButton2.setGraphic(resumeButton2ImageView);
-
-        Image restartButtonImage = new Image("restart.png");
-        ImageView restartButtonView = new ImageView(restartButtonImage);
-        restartButton = new Button("");
-        restartButton.setId("pause-button");
-        restartButton.setPrefSize(65, 55);
-        restartButton.setTranslateX(110);
-        restartButton.setTranslateY(405);
-        restartButton.setGraphic(restartButtonView);
-
-        Image homeButtonImage = new Image("homeButton.png");
-        ImageView homeButtonView = new ImageView(homeButtonImage);
-        homeButton = new Button("");
-        homeButton.setId("pause-button");
-        homeButton.setPrefSize(65, 55);
-        homeButton.setTranslateX(320);
-        homeButton.setTranslateY(405);
-        homeButton.setGraphic(homeButtonView);
-    }
-
     private void initLabels(){
         //pause label
          pauseLabel = new Label("PAUSE");
@@ -512,12 +429,12 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         heartImageView.setFitHeight(heartHeight);
 
          //pause menu
-         Image pauseMenuImage = new Image("pauseMenu.png");
-         ImagePattern pauseMenuPattern = new ImagePattern(pauseMenuImage);
-         pauseMenu = new Rectangle(345, 130);
-         pauseMenu.setTranslateY(250);
-         pauseMenu.setTranslateX(75);
-         pauseMenu.setFill(pauseMenuPattern);
+        Image pauseMenuImage = new Image("pauseMenu.png");
+        ImagePattern pauseMenuPattern = new ImagePattern(pauseMenuImage);
+        pauseMenu = new Rectangle(345, 130);
+        pauseMenu.setTranslateY(250);
+        pauseMenu.setTranslateX(75);
+        pauseMenu.setFill(pauseMenuPattern);
     }
 
     private void initRoots(){
@@ -528,7 +445,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         settingRoot = new Pane();
         settingScene = new Scene(settingRoot, sceneWidth, sceneHeigt);
         settingScene.getStylesheets().add("style.css");
-        settingRoot.getChildren().addAll(pauseMenu, bgMusicSlider, resumeButton2, settingLabel);
+        settingRoot.getChildren().addAll(pauseMenu, bgMusicSlider, uiHandler.getButton(resumeButton2), uiHandler.getLabel(settingLabel));
 
         gameOverRoot = new Pane();
         gameOverScene = new Scene(gameOverRoot, sceneWidth, sceneHeigt);
@@ -536,75 +453,71 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         root = new Pane();
         if (loadFromSave == false) {
-            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, heartImageView, settings, settingLabel, countDownLabel, quit, load);
+            root.getChildren().addAll(rect, ball, uiHandler.getLabel(scoreLabel), uiHandler.getLabel(heartLabel), uiHandler.getLabel(levelLabel), uiHandler.getButton(newGame), heartImageView, uiHandler.getButton(settings), uiHandler.getLabel(settingLabel), uiHandler.getLabel(countDownLabel), uiHandler.getButton(quit), uiHandler.getButton(load));
         } else {
-            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, heartImageView, settings, pause, settingLabel, quit, load);
+            root.getChildren().addAll(rect, ball, uiHandler.getLabel(scoreLabel), uiHandler.getLabel(heartLabel), uiHandler.getLabel(levelLabel), uiHandler.getButton(newGame), heartImageView, uiHandler.getButton(settings), uiHandler.getLabel(settingLabel), uiHandler.getLabel(countDownLabel), uiHandler.getButton(quit), uiHandler.getButton(load));
         }
     }
 
     private void initButtonActions(){
-        settings.setOnAction(event -> {
+        uiHandler.getButton(settings).setOnAction(event -> {
             slideUpAnimation(settingRoot);
             primaryStage.setScene(settingScene);
             settingRoot.getChildren().addAll(pauseMenu, bgMusicSlider, resumeButton2, settingLabel);
         });
 
-        load.setOnAction(new EventHandler<ActionEvent>() {
+
+        uiHandler.getButton(load).setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 loadGame();
-                load.setVisible(false);
-                newGame.setVisible(false);
-                pause.setVisible(true);
-                settings.setVisible(false);
+                root.getChildren().removeAll(uiHandler.getButton(load), uiHandler.getButton(newGame), uiHandler.getButton(settings), uiHandler.getButton(quit));
+                root.getChildren().add(uiHandler.getButton(pause));
             }
         });
 
 
-        quit.setOnAction(event-> {
+        uiHandler.getButton(quit).setOnAction(event-> {
             Platform.exit();
         });
 
 
-        restartButton.setOnAction(new EventHandler<ActionEvent>() {
+        uiHandler.getButton(restartButton).setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 engine.stop();
                 restartGame();
                 engine = new GameEngine();
                 engine.setOnAction(Main.this);
-                engine.setFps(150);
+                engine.setFps(250);
                 engine.start();
-                load.setVisible(false);
-                newGame.setVisible(false);
-                settings.setVisible(false);
+                root.getChildren().add(uiHandler.getButton(pause));
+                root.getChildren().removeAll(uiHandler.getButton(load), uiHandler.getButton(newGame), uiHandler.getButton(settings), uiHandler.getButton(quit));
                 pause.setFocusTraversable(false);
-                pause.setVisible(true);
-                quit.setVisible(false);
             }
         });
 
-        resumeButton.setOnAction(event -> {
+        uiHandler.getButton(restartButton).setOnAction(event -> {
             isGamePaused = false;
-            pauseRoot.getChildren().removeAll(pauseMenu, pauseLabel, restartButton, homeButton, resumeButton, bgMusicSlider);
+            pauseRoot.getChildren().removeAll(pauseMenu, uiHandler.getLabel(pauseLabel), uiHandler.getButton(restartButton), uiHandler.getButton(homeButton), bgMusicSlider);
             primaryStage.setScene(scene);
             engine.start();
         });
 
-        homeButton.setOnAction(event -> {
+        uiHandler.getButton(homeButton).setOnAction(event -> {
             primaryStage.setScene(scene);
             goHome();
         });
 
-        resumeButton2.setOnAction(event -> {
+        uiHandler.getButton(resumeButton).setOnAction(event -> {
             primaryStage.setScene(scene);
         }); 
 
-        pause.setOnAction(event -> {
+        uiHandler.getButton(pause).setOnAction(event -> {
             if(!isGamePaused) {
                 isGamePaused = true;
                 engine.stop();
-                pauseRoot.getChildren().addAll(pauseMenu, pauseLabel, restartButton, homeButton, resumeButton, bgMusicSlider);
+                pauseRoot.getChildren().addAll(pauseMenu, uiHandler.getLabel(pauseLabel), uiHandler.getButton(restartButton), uiHandler.getButton(homeButton), uiHandler.getButton(resumeButton), bgMusicSlider);
                 slideUpAnimation(pauseRoot);
                 primaryStage.setScene(pauseScene);
                 System.out.println("Game paused");
