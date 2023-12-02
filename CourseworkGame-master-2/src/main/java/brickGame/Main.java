@@ -32,10 +32,10 @@ import javafx.animation.Timeline;
 public class Main extends Application implements EventHandler<KeyEvent>, GameEngine.OnAction {
     private BgMusicManager bgMusicManager;
     private SliderManager sliderManager;
+    private SliderManagerSound sliderManagerSound;
     private UIHandler uiHandler;
 
     private boolean isGamePaused = false;
-    private ImageView heartImageView;
 
     private int level = 0;
 
@@ -43,16 +43,12 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private double centerBreakX;
     private double yBreak = 640.0f;
 
-    private int heartWidth = 40;
-    private int heartHeight = 40;
-
     private int breakWidth     = 130;
     private int breakHeight    = 30;
     private int halfBreakWidth = breakWidth / 2;
 
     private int sceneWidth = 500;
     private int sceneHeigt = 700;
-
 
     private static int LEFT  = 1;
     private static int RIGHT = 2;
@@ -66,7 +62,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     private Rectangle rect;
     public Rectangle background;
-    private Rectangle pauseMenu;
     private Rectangle saveMenu;
     private int       ballRadius = 10;
 
@@ -91,21 +86,21 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     private ArrayList<Block> blocks = new ArrayList<Block>();
     private ArrayList<Bonus> chocos = new ArrayList<Bonus>();
-    private Color[]          colors = new Color[]{
-            Color.MAGENTA,
-            Color.RED,
-            Color.GOLD,
-            Color.CORAL,
-            Color.AQUA,
-            Color.VIOLET,
-            Color.GREENYELLOW,
-            Color.ORANGE,
-            Color.PINK,
-            Color.SLATEGREY,
-            Color.YELLOW,
-            Color.TOMATO,
-            Color.TAN,
-    };
+    // private Color[]          colors = new Color[]{
+    //         Color.MAGENTA,
+    //         Color.RED,
+    //         Color.GOLD,
+    //         Color.CORAL,
+    //         Color.AQUA,
+    //         Color.VIOLET,
+    //         Color.GREENYELLOW,
+    //         Color.ORANGE,
+    //         Color.PINK,
+    //         Color.SLATEGREY,
+    //         Color.YELLOW,
+    //         Color.TOMATO,
+    //         Color.TAN,
+    // };
     
     public  Pane             root;
     public  Pane             pauseRoot;
@@ -114,42 +109,26 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private Label            scoreLabel;
     private Label            heartLabel;
     private Label            levelLabel;
-    private Label            pauseLabel;
-    private Label            settingLabel;
     private Label            countDownLabel;
     private String           bgMusicFile;
     private Media            bgMusicMedia;
     private Slider           bgMusicSlider;
+    private Slider           soundSlider;
 
     private Scene settingScene;
     private Scene pauseScene;
     private Scene gameOverScene;
     private Scene scene;
 
-
-    private MediaPlayer     mediaPlayer;
     private Timeline        timeline;
 
     private boolean loadFromSave = false;
     private boolean gameInitialized = false;
 
     Stage  primaryStage;
-    Button load    = null;
-    Button newGame = null;
-    Button settings = null;
-    Button quit = null;
-    Button pause = null;
-    Button resumeButton = null;
-    Button resumeButton2 = null;
-    Button restartButton = null;
-    Button homeButton = null;
-
-
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        uiHandler = new UIHandler(primaryStage, heart, level, score);
-
         bgMusicManager = BgMusicManager.getInstance();
         if (!bgMusicManager.isPlaying()) {
             bgMusicManager.initialize("/bgMusic.mp3");
@@ -160,6 +139,12 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             sliderManager = SliderManager.getInstance();
             bgMusicSlider = sliderManager.getBgMusicController();
         }
+
+        if(sliderManagerSound == null) {
+            sliderManagerSound = SliderManagerSound.getInstance();
+            soundSlider = sliderManagerSound.getSoundController();
+        }
+
 
         this.primaryStage = primaryStage;
 
@@ -179,13 +164,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             initBoard();
 
         }
-
-        // uiHandler.getButton(load).setOnAction(null);
-
-        // initLabels();
-        initImages();
+        
+        uiHandler = new UIHandler(primaryStage);
+        initLabels();
         initRoots();
-        initScene();
 
         scene = new Scene(root, sceneWidth, sceneHeigt);
         scene.getStylesheets().add("style.css");
@@ -198,41 +180,41 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         if (loadFromSave == false) {
             if (level > 1 && level < 18) {
-                addBlocksToRoot();
-                pause.setFocusTraversable(false);
-                root.getChildren().removeAll(uiHandler.getButton(pause), uiHandler.getButton(load), uiHandler.getButton(newGame), uiHandler.getButton(settings), uiHandler.getButton(quit));
-                root.getChildren().add(uiHandler.getButton(pause));  
+                root.getChildren().removeAll(uiHandler.getButton("load"), uiHandler.getButton("newGame"), uiHandler.getButton("settings"), uiHandler.getButton("quit"));
+                root.getChildren().add(uiHandler.getButton("pause"));
+                uiHandler.getButton("pause").setFocusTraversable(false); 
                 engine = new GameEngine();
                 engine.setOnAction(this);
-                engine.setFps(250);
+                engine.setFps(240);
+                addBlocksToRoot(); 
                 engine.start();
             }
  
-        uiHandler.getButton(newGame).setOnAction(new EventHandler<ActionEvent>() {
+            uiHandler.getButton("newGame").setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                SoundManager.playButtonSound();
                 addBlocksToRoot();
                 engine = new GameEngine();
                 engine.setOnAction(Main.this);
-                engine.setFps(250);
-                root.getChildren().removeAll(uiHandler.getButton(pause), uiHandler.getButton(newGame), uiHandler.getButton(load), uiHandler.getButton(settings), uiHandler.getButton(quit));
-                pause.setFocusTraversable(false);
+                engine.setFps(240);
+                root.getChildren().removeAll(uiHandler.getButton("pause"), uiHandler.getButton("load"), uiHandler.getButton("newGame"), uiHandler.getButton("settings"), uiHandler.getButton("quit"));
+                uiHandler.getButton("pause").setFocusTraversable(false);
                 countDownDisplay();
             }
         });
         } else {
-            addBlocksToRoot();
-            root.getChildren().removeAll(uiHandler.getButton(load), uiHandler.getButton(newGame), uiHandler.getButton(settings), uiHandler.getButton(quit));
-            pause.setFocusTraversable(false);
-            pause.setVisible(true);
+            root.getChildren().removeAll(uiHandler.getButton("pause"), uiHandler.getButton("load"), uiHandler.getButton("newGame"), uiHandler.getButton("settings"), uiHandler.getButton("quit"));
+            uiHandler.getButton("pause").setFocusTraversable(false);
+            root.getChildren().add(uiHandler.getButton("pause"));
             engine = new GameEngine();
             engine.setOnAction(this);
-            engine.setFps(250);
+            engine.setFps(240);
+            addBlocksToRoot();
             engine.start();
             loadFromSave = false;
         }
     }
-
     private void addBlocksToRoot() {
         for (Block block : blocks) {
             root.getChildren().add(block.rect);
@@ -254,7 +236,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                         countDownLabel.setVisible(false);
                         timeline.stop();
                         engine.start();
-                        root.getChildren().add(uiHandler.getButton(pause));
+                        root.getChildren().add((uiHandler.getButton("pause")));
                     }
                 }
             })
@@ -262,6 +244,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     timeline.setCycleCount(4); 
     timeline.play();
     }
+    
 
     private void initBoard() {
         for (int i = 0; i < 4; i++) {
@@ -382,20 +365,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     private void initLabels(){
-        //pause label
-         pauseLabel = new Label("PAUSE");
-         pauseLabel.getStyleClass().add("bigText");
-         pauseLabel.setStyle("-fx-font-size: 24px");
-         pauseLabel.setTranslateX(180);
-         pauseLabel.setTranslateY(200);
-         
-        //setting label
-        settingLabel = new Label("SETTING");
-        settingLabel.getStyleClass().add("bigText");
-        settingLabel.setStyle("-fx-font-size: 24px");
-        settingLabel.setTranslateX(158);
-        settingLabel.setTranslateY(200);
-        settingLabel.setVisible(false);
         
         //countdown label(3,2,1)
         countDownLabel = new Label("");
@@ -404,39 +373,18 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         countDownLabel.setTranslateX(sceneWidth / 2 - 20);
         countDownLabel.setTranslateY(sceneHeigt / 2);
 
-        //score label
         scoreLabel = new Label("SCORE: " + score);
         scoreLabel.getStyleClass().add("text");
-        
-        //level label
+
         levelLabel = new Label("LEVEL: " + level);
         levelLabel.setTranslateY(30);
         levelLabel.getStyleClass().add("text");
         
-        //heart label
         heartLabel = new Label("X" + heart);
         heartLabel.setTranslateY(15);
         heartLabel.setTranslateX(sceneWidth - 55);
         heartLabel.getStyleClass().add("text");
     }
-
-    private void initImages(){
-        //heart ui
-        heartImageView = new ImageView(new Image("lives.png"));
-        heartImageView.setTranslateX(sceneWidth - 100);
-        heartImageView.setTranslateY(10);
-        heartImageView.setFitWidth(heartWidth);
-        heartImageView.setFitHeight(heartHeight);
-
-         //pause menu
-        Image pauseMenuImage = new Image("pauseMenu.png");
-        ImagePattern pauseMenuPattern = new ImagePattern(pauseMenuImage);
-        pauseMenu = new Rectangle(345, 130);
-        pauseMenu.setTranslateY(250);
-        pauseMenu.setTranslateX(75);
-        pauseMenu.setFill(pauseMenuPattern);
-    }
-
     private void initRoots(){
         pauseRoot = new Pane();
         pauseScene = new Scene(pauseRoot, sceneWidth, sceneHeigt);
@@ -445,7 +393,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         settingRoot = new Pane();
         settingScene = new Scene(settingRoot, sceneWidth, sceneHeigt);
         settingScene.getStylesheets().add("style.css");
-        settingRoot.getChildren().addAll(pauseMenu, bgMusicSlider, uiHandler.getButton(resumeButton2), uiHandler.getLabel(settingLabel));
+        settingRoot.getChildren().addAll(uiHandler.getRectangle("pauseMenu"), bgMusicSlider, uiHandler.getButton("resume2"), uiHandler.getLabel("settingLabel"), soundSlider);
 
         gameOverRoot = new Pane();
         gameOverScene = new Scene(gameOverRoot, sceneWidth, sceneHeigt);
@@ -453,92 +401,80 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         root = new Pane();
         if (loadFromSave == false) {
-            root.getChildren().addAll(rect, ball, uiHandler.getLabel(scoreLabel), uiHandler.getLabel(heartLabel), uiHandler.getLabel(levelLabel), uiHandler.getButton(newGame), heartImageView, uiHandler.getButton(settings), uiHandler.getLabel(settingLabel), uiHandler.getLabel(countDownLabel), uiHandler.getButton(quit), uiHandler.getButton(load));
+            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, uiHandler.getButton("newGame"), uiHandler.getImageView("heartImageView"), uiHandler.getButton("settings"), countDownLabel, uiHandler.getButton("quit"), uiHandler.getButton("load"));
         } else {
-            root.getChildren().addAll(rect, ball, uiHandler.getLabel(scoreLabel), uiHandler.getLabel(heartLabel), uiHandler.getLabel(levelLabel), uiHandler.getButton(newGame), heartImageView, uiHandler.getButton(settings), uiHandler.getLabel(settingLabel), uiHandler.getLabel(countDownLabel), uiHandler.getButton(quit), uiHandler.getButton(load));
+            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, uiHandler.getButton("newGame"), uiHandler.getImageView("heartImageView"), uiHandler.getButton("settings"), countDownLabel, uiHandler.getButton("quit"), uiHandler.getButton("load"));
         }
     }
 
     private void initButtonActions(){
-        uiHandler.getButton(settings).setOnAction(event -> {
+        uiHandler.getButton("settings").setOnAction(event -> {
+            SoundManager.playButtonSound();
             slideUpAnimation(settingRoot);
             primaryStage.setScene(settingScene);
-            settingRoot.getChildren().addAll(pauseMenu, bgMusicSlider, resumeButton2, settingLabel);
+            settingRoot.getChildren().addAll(uiHandler.getRectangle("pauseMenu"), bgMusicSlider, uiHandler.getButton("resume2"), uiHandler.getLabel("settingLabel"), soundSlider);
         });
 
-
-        uiHandler.getButton(load).setOnAction(new EventHandler<ActionEvent>() {
+        uiHandler.getButton("load").setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 loadGame();
-                root.getChildren().removeAll(uiHandler.getButton(load), uiHandler.getButton(newGame), uiHandler.getButton(settings), uiHandler.getButton(quit));
-                root.getChildren().add(uiHandler.getButton(pause));
+                root.getChildren().removeAll(uiHandler.getButton("load"), uiHandler.getButton("newGame"), uiHandler.getButton("settings"), uiHandler.getButton("quit"));
+                root.getChildren().add(uiHandler.getButton("pause"));
             }
         });
 
 
-        uiHandler.getButton(quit).setOnAction(event-> {
+        uiHandler.getButton("quit").setOnAction(event-> {
             Platform.exit();
         });
 
 
-        uiHandler.getButton(restartButton).setOnAction(new EventHandler<ActionEvent>() {
+        uiHandler.getButton("restart").setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                SoundManager.playButtonSound();
                 engine.stop();
                 restartGame();
                 engine = new GameEngine();
                 engine.setOnAction(Main.this);
-                engine.setFps(250);
-                engine.start();
-                root.getChildren().add(uiHandler.getButton(pause));
-                root.getChildren().removeAll(uiHandler.getButton(load), uiHandler.getButton(newGame), uiHandler.getButton(settings), uiHandler.getButton(quit));
-                pause.setFocusTraversable(false);
+                engine.setFps(240);
+                root.getChildren().removeAll(uiHandler.getButton("pause"), uiHandler.getButton("load"), uiHandler.getButton("newGame"), uiHandler.getButton("settings"), uiHandler.getButton("quit"));
+                uiHandler.getButton("pause").setFocusTraversable(false);
+                countDownDisplay();
             }
         });
 
-        uiHandler.getButton(restartButton).setOnAction(event -> {
-            isGamePaused = false;
-            pauseRoot.getChildren().removeAll(pauseMenu, uiHandler.getLabel(pauseLabel), uiHandler.getButton(restartButton), uiHandler.getButton(homeButton), bgMusicSlider);
-            primaryStage.setScene(scene);
-            engine.start();
-        });
-
-        uiHandler.getButton(homeButton).setOnAction(event -> {
+        uiHandler.getButton("home").setOnAction(event -> {
+            SoundManager.playButtonSound();
             primaryStage.setScene(scene);
             goHome();
         });
 
-        uiHandler.getButton(resumeButton).setOnAction(event -> {
+        uiHandler.getButton("resume2").setOnAction(event -> {
+            SoundManager.playButtonSound();
             primaryStage.setScene(scene);
         }); 
 
-        uiHandler.getButton(pause).setOnAction(event -> {
+        uiHandler.getButton("resume").setOnAction(event -> {
+            SoundManager.playButtonSound();
+            isGamePaused = false;
+            pauseRoot.getChildren().removeAll(uiHandler.getRectangle("pauseMenu"), uiHandler.getLabel("pauseLabel"), uiHandler.getButton("restart"), uiHandler.getButton("home"), uiHandler.getButton("resume"), bgMusicSlider, soundSlider);
+            primaryStage.setScene(scene);
+            engine.start();
+        });
+
+        uiHandler.getButton("pause").setOnAction(event -> {
             if(!isGamePaused) {
+                SoundManager.playButtonSound();
                 isGamePaused = true;
                 engine.stop();
-                pauseRoot.getChildren().addAll(pauseMenu, uiHandler.getLabel(pauseLabel), uiHandler.getButton(restartButton), uiHandler.getButton(homeButton), uiHandler.getButton(resumeButton), bgMusicSlider);
+                pauseRoot.getChildren().addAll(uiHandler.getRectangle("pauseMenu"), uiHandler.getLabel("pauseLabel"), uiHandler.getButton("restart"), uiHandler.getButton("home"), uiHandler.getButton("resume"), bgMusicSlider, soundSlider);
                 slideUpAnimation(pauseRoot);
                 primaryStage.setScene(pauseScene);
                 System.out.println("Game paused");
-            }else{
-                isGamePaused = false;
-                primaryStage.setScene(scene);
-                engine.start();
-                System.out.println("Game resumed");
             }
         });
-
-    }
-
-    private void initScene(){
-        scene = new Scene(root, sceneWidth, sceneHeigt);
-        scene.getStylesheets().add("style.css");
-        scene.setOnKeyPressed(this);
-
-        primaryStage.setTitle("Game");
-        primaryStage.setScene(scene);
-        primaryStage.show();
     }
 
     private boolean goDownBall                  = true;
@@ -557,7 +493,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
 
     private void resetColideFlags() {
-
         colideToBreak = false;
         colideToBreakAndMoveToRight = false;
         colideToRightWall = false;
@@ -599,6 +534,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
                 if (heart == 0) {
                     new Score().showGameOver(this, score);
+                    SoundManager.playGameOverSound();
                     primaryStage.setScene(gameOverScene);
                     engine.stop();
                 }
@@ -674,7 +610,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
 
         if (colideToLeftBlock) {
-            goRightBall = true;
+            goRightBall = false;
         }
 
         if (colideToTopBlock) {
@@ -801,7 +737,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         blocks.clear();
         chocos.clear();
 
-        pause.setFocusTraversable(false);
+        uiHandler.getButton("pause").setFocusTraversable(false);
 
         for (BlockSerializable ser : loadSave.blocks) {
             int r = new Random().nextInt(200);
@@ -810,11 +746,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
 
         try {
-            System.out.println("Poo Poo");
             loadFromSave = true;
-            if (loadFromSave == true) {
-                System.out.println("Loadfromsave is true");
-            }
             start(primaryStage);
         } catch (Exception e) {
             e.printStackTrace();
@@ -848,6 +780,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                     chocos.clear();
                     destroyedBlockCount = 0;
                     start(primaryStage);
+                    // updateScore(score);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -912,7 +845,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             e.printStackTrace();
         }
     }
-
+    
     @Override
     public void onUpdate() {
         Platform.runLater(new Runnable() {
@@ -933,13 +866,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             }
         });
 
-
         if (yBall >= Block.getPaddingTop() && yBall <= (Block.getHeight() * (level + 1)) + Block.getPaddingTop()) {
             for (final Block block : blocks) {
                 int hitCode = block.checkHitToBlock(xBall, yBall);
                 if (hitCode != Block.NO_HIT && !block.isDestroyed) {
-                    
-                    score += 1;
 
                     new Score().show(block.x, block.y, 1, this);
 
@@ -949,7 +879,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                     // block.isDestroyed = true;
                 
                     if(block.isDestroyed) {
+                        score += 1;
                         destroyedBlockCount++;
+                        // updateScore(score);
                     }
 
                     //System.out.println("size is " + blocks.size());
@@ -1004,8 +936,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     public void onPhysicsUpdate() {
             checkDestroyedCount();
             setPhysicsToBall();
-    
-
 
         if (time - goldTime > 5000) {
             ball.setFill(new ImagePattern(new Image("ball1.png")));
@@ -1026,15 +956,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             }
             choco.y += ((time - choco.timeCreated) / 1000.000) + 1.000;
         }
-
         //System.out.println("time is:" + time + " goldTime is " + goldTime);
-
     }
-
-
     @Override
     public void onTime(long time) {
         this.time = time;
-    }
-    
+    }  
 }

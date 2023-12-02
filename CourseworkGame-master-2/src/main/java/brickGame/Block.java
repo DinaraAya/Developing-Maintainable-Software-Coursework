@@ -11,6 +11,8 @@ import java.io.Serializable;
 public class Block implements Serializable {
     private static Block block = new Block(-1, -1, 99);
 
+    private boolean isHit;
+
     public int row;
     public int column;
 
@@ -129,6 +131,7 @@ public class Block implements Serializable {
 
         return NO_HIT;
     }
+    
 
     public static int getPaddingTop() {
         return block.paddingTop;
