@@ -35,8 +35,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private SliderManager sliderManager;
     private SliderManagerSound sliderManagerSound;
     private GameView gameView;
-    private GameModel model;
-    private GameController controller;
+    private GameModel gameModel;
+
+    // private GameController controller;
 
     private boolean isGamePaused = false;
 
@@ -156,6 +157,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 new Score().showMessage("Level Up :)", this);
             }
             if (level == 18) {
+                //FIX
                 new Score().showWin(this);
                 return;
             }
@@ -166,26 +168,32 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         }
 
-        model = new GameModel();
-        controller = new GameController(model);
-        
         gameView = new GameView(primaryStage, score, level, heart);
         initLabels();
-        initRoots();
 
-        scene = new Scene(root, sceneWidth, sceneHeigt);
-        scene.getStylesheets().add("style.css");
-        scene.setOnKeyPressed(this);
+        gameView.getRoots("root").getChildren().addAll(rect, ball, gameView.getLabel("heartLabel"), gameView.getLabel("levelLabel"), gameView.getButton("newGame"), gameView.getImageView("heartImageView"), gameView.getButton("settings"), countDownLabel, gameView.getButton("quit"), gameView.getButton("load"),gameView.getLabel("scoreLabel"));
+        gameView.getRoots("settingRoot").getChildren().addAll(gameView.getRectangle("pauseMenu"), bgMusicSlider, gameView.getButton("resume2"), gameView.getLabel("settingLabel"), soundSlider);
+        
+
+        gameModel = new GameModel();
+        // controller = new GameController(model);
+        
+        
+        // initRoots();
+
+        // scene = new Scene(root, sceneWidth, sceneHeigt);
+        // scene.getStylesheets().add("style.css");
+        gameView.getScene("scene").setOnKeyPressed(this);
         primaryStage.setTitle("Game");
-        primaryStage.setScene(scene);
+        primaryStage.setScene(gameView.getScene("scene"));
         primaryStage.show();
 
         initButtonActions();
 
         if (loadFromSave == false) {
             if (level > 1 && level < 18) {
-                root.getChildren().removeAll(gameView.getButton("load"), gameView.getButton("newGame"), gameView.getButton("settings"), gameView.getButton("quit"));
-                root.getChildren().add(gameView.getButton("pause"));
+                gameView.getRoots("root").getChildren().removeAll(gameView.getButton("load"), gameView.getButton("newGame"), gameView.getButton("settings"), gameView.getButton("quit"));
+                gameView.getRoots("root").getChildren().add(gameView.getButton("pause"));
                 gameView.getButton("pause").setFocusTraversable(false); 
                 engine = new GameEngine();
                 engine.setOnAction(this);
@@ -202,15 +210,15 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 engine = new GameEngine();
                 engine.setOnAction(Main.this);
                 engine.setFps(240);
-                root.getChildren().removeAll(gameView.getButton("pause"), gameView.getButton("load"), gameView.getButton("newGame"), gameView.getButton("settings"), gameView.getButton("quit"));
+                gameView.getRoots("root").getChildren().removeAll(gameView.getButton("pause"), gameView.getButton("load"), gameView.getButton("newGame"), gameView.getButton("settings"), gameView.getButton("quit"));
                 gameView.getButton("pause").setFocusTraversable(false);
                 countDownDisplay();
             }
         });
         } else {
-            root.getChildren().removeAll(gameView.getButton("pause"), gameView.getButton("load"), gameView.getButton("newGame"), gameView.getButton("settings"), gameView.getButton("quit"));
+            gameView.getRoots("root").getChildren().removeAll(gameView.getButton("pause"), gameView.getButton("load"), gameView.getButton("newGame"), gameView.getButton("settings"), gameView.getButton("quit"));
             gameView.getButton("pause").setFocusTraversable(false);
-            root.getChildren().add(gameView.getButton("pause"));
+            gameView.getRoots("root").getChildren().add(gameView.getButton("pause"));
             engine = new GameEngine();
             engine.setOnAction(this);
             engine.setFps(240);
@@ -221,7 +229,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
     private void addBlocksToRoot() {
         for (Block block : blocks) {
-            root.getChildren().add(block.rect);
+            gameView.getRoots("root").getChildren().add(block.rect);
         }
     }
 
@@ -240,7 +248,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                         countDownLabel.setVisible(false);
                         timeline.stop();
                         engine.start();
-                        root.getChildren().add((gameView.getButton("pause")));
+                        gameView.getRoots("root").getChildren().add((gameView.getButton("pause")));
                     }
                 }
             })
@@ -348,9 +356,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     private void initBall() {
-        Random random = new Random();
-        xBall = random.nextInt(sceneWidth) + 1;
-        yBall = random.nextInt(sceneHeigt - 200) + ((level + 1) * Block.getHeight()) + 15;
+        xBall = sceneWidth/2.0;
+        yBall = sceneHeigt - (sceneHeigt/4.0);
+
         ball = new Circle();
         ball.setRadius(ballRadius);
         ball.setFill(new ImagePattern(new Image("ball1.png")));
@@ -378,42 +386,42 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     }
 
-    private void initRoots(){
-        pauseRoot = new Pane();
-        pauseScene = new Scene(pauseRoot, sceneWidth, sceneHeigt);
-        pauseScene.getStylesheets().add("style.css");
+    // private void initRoots(){
+    //     // pauseRoot = new Pane();
+    //     // pauseScene = new Scene(gameView.getRoots("pauseRoot"), sceneWidth, sceneHeigt);
+    //     // pauseScene.getStylesheets().add("style.css");
 
-        settingRoot = new Pane();
-        settingScene = new Scene(settingRoot, sceneWidth, sceneHeigt);
-        settingScene.getStylesheets().add("style.css");
-        settingRoot.getChildren().addAll(gameView.getRectangle("pauseMenu"), bgMusicSlider, gameView.getButton("resume2"), gameView.getLabel("settingLabel"), soundSlider);
+    //     // settingRoot = new Pane();
+    //     // settingScene = new Scene(gameView.getRoots("settingRoot"), sceneWidth, sceneHeigt);
+    //     // settingScene.getStylesheets().add("style.css");
+    //     gameView.getRoots("settingRoot").getChildren().addAll(gameView.getRectangle("pauseMenu"), bgMusicSlider, gameView.getButton("resume2"), gameView.getLabel("settingLabel"), soundSlider);
 
-        gameOverRoot = new Pane();
-        gameOverScene = new Scene(gameOverRoot, sceneWidth, sceneHeigt);
-        gameOverScene.getStylesheets().add("style.css");
+    //     // gameOverRoot = new Pane();
+    //     // gameOverScene = new Scene(gameView.getRoots("gameOverRoot"), sceneWidth, sceneHeigt);
+    //     // gameOverScene.getStylesheets().add("style.css");
 
-        root = new Pane();
-        if (loadFromSave == false) {
-            root.getChildren().addAll(rect, ball, gameView.getLabel("heartLabel"), gameView.getLabel("levelLabel"), gameView.getButton("newGame"), gameView.getImageView("heartImageView"), gameView.getButton("settings"), countDownLabel, gameView.getButton("quit"), gameView.getButton("load"), gameView.getLabel("scoreLabel"));
-        } else {
-            root.getChildren().addAll(rect, ball, gameView.getLabel("heartLabel"), gameView.getLabel("levelLabel"), gameView.getButton("newGame"), gameView.getImageView("heartImageView"), gameView.getButton("settings"), countDownLabel, gameView.getButton("quit"), gameView.getButton("load"),gameView.getLabel("scoreLabel"));
-        }
-    }
+    //     // root = new Pane();
+    //     // if (loadFromSave == false) {
+    //         // root.getChildren().addAll(rect, ball, gameView.getLabel("heartLabel"), gameView.getLabel("levelLabel"), gameView.getButton("newGame"), gameView.getImageView("heartImageView"), gameView.getButton("settings"), countDownLabel, gameView.getButton("quit"), gameView.getButton("load"), gameView.getLabel("scoreLabel"));
+    //     // } else {
+    //         root.getChildren().addAll(rect, ball, gameView.getLabel("heartLabel"), gameView.getLabel("levelLabel"), gameView.getButton("newGame"), gameView.getImageView("heartImageView"), gameView.getButton("settings"), countDownLabel, gameView.getButton("quit"), gameView.getButton("load"),gameView.getLabel("scoreLabel"));
+    //     // }
+    // }
 
     private void initButtonActions(){
         gameView.getButton("settings").setOnAction(event -> {
             SoundManager.playButtonSound();
-            slideUpAnimation(settingRoot);
-            primaryStage.setScene(settingScene);
-            settingRoot.getChildren().addAll(gameView.getRectangle("pauseMenu"), bgMusicSlider, gameView.getButton("resume2"), gameView.getLabel("settingLabel"), soundSlider);
+            slideUpAnimation(gameView.getRoots("settingRoot"));
+            primaryStage.setScene(gameView.getScene("settingScene"));
+            gameView.getRoots("settingRoot").getChildren().addAll(gameView.getRectangle("pauseMenu"), bgMusicSlider, gameView.getButton("resume2"), gameView.getLabel("settingLabel"), soundSlider);
         });
 
         gameView.getButton("load").setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 loadGame();
-                root.getChildren().removeAll(gameView.getButton("load"), gameView.getButton("newGame"), gameView.getButton("settings"), gameView.getButton("quit"));
-                root.getChildren().add(gameView.getButton("pause"));
+                gameView.getRoots("root").getChildren().removeAll(gameView.getButton("load"), gameView.getButton("newGame"), gameView.getButton("settings"), gameView.getButton("quit"));
+                gameView.getRoots("root").getChildren().add(gameView.getButton("pause"));
             }
         });
 
@@ -432,7 +440,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 engine = new GameEngine();
                 engine.setOnAction(Main.this);
                 engine.setFps(240);
-                root.getChildren().removeAll(gameView.getButton("pause"), gameView.getButton("load"), gameView.getButton("newGame"), gameView.getButton("settings"), gameView.getButton("quit"));
+                gameView.getRoots("root").getChildren().removeAll(gameView.getButton("pause"), gameView.getButton("load"), gameView.getButton("newGame"), gameView.getButton("settings"), gameView.getButton("quit"));
                 gameView.getButton("pause").setFocusTraversable(false);
                 countDownDisplay();
             }
@@ -440,20 +448,20 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         gameView.getButton("home").setOnAction(event -> {
             SoundManager.playButtonSound();
-            primaryStage.setScene(scene);
+            primaryStage.setScene(gameView.getScene("scene"));
             goHome();
         });
 
         gameView.getButton("resume2").setOnAction(event -> {
             SoundManager.playButtonSound();
-            primaryStage.setScene(scene);
+            primaryStage.setScene(gameView.getScene("scene"));
         }); 
 
         gameView.getButton("resume").setOnAction(event -> {
             SoundManager.playButtonSound();
             isGamePaused = false;
-            pauseRoot.getChildren().removeAll(gameView.getRectangle("pauseMenu"), gameView.getLabel("pauseLabel"), gameView.getButton("restart"), gameView.getButton("home"), gameView.getButton("resume"), bgMusicSlider, soundSlider);
-            primaryStage.setScene(scene);
+            gameView.getRoots("pauseRoot").getChildren().removeAll(gameView.getRectangle("pauseMenu"), gameView.getLabel("pauseLabel"), gameView.getButton("restart"), gameView.getButton("home"), gameView.getButton("resume"), bgMusicSlider, soundSlider);
+            primaryStage.setScene(gameView.getScene("scene"));
             engine.start();
         });
 
@@ -462,9 +470,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 SoundManager.playButtonSound();
                 isGamePaused = true;
                 engine.stop();
-                pauseRoot.getChildren().addAll(gameView.getRectangle("pauseMenu"), gameView.getLabel("pauseLabel"), gameView.getButton("restart"), gameView.getButton("home"), gameView.getButton("resume"), bgMusicSlider, soundSlider);
-                slideUpAnimation(pauseRoot);
-                primaryStage.setScene(pauseScene);
+                gameView.getRoots("pauseRoot").getChildren().addAll(gameView.getRectangle("pauseMenu"), gameView.getLabel("pauseLabel"), gameView.getButton("restart"), gameView.getButton("home"), gameView.getButton("resume"), bgMusicSlider, soundSlider);
+                slideUpAnimation(gameView.getRoots("pauseRoot"));
+                primaryStage.setScene(gameView.getScene("pauseScene"));
                 System.out.println("Game paused");
             }
         });
@@ -485,7 +493,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private double vY = 1.000;
 
 
-    private void resetColideFlags() {
+    public void resetColideFlags() {
         colideToBreak = false;
         colideToBreakAndMoveToRight = false;
         colideToRightWall = false;
@@ -526,9 +534,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 new Score().show(sceneWidth / 2, sceneHeigt / 2, -1, this);
 
                 if (heart == 0) {
-                    new Score().showGameOver(this, score);
+                    new Score().showGameOver(gameView, this, score);
                     SoundManager.playGameOverSound();
-                    primaryStage.setScene(gameOverScene);
+                    primaryStage.setScene(gameView.getScene("gameOverScene"));
                     engine.stop();
                 }
 
@@ -767,12 +775,32 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                     hitTime = 0;
                     time = 0;
                     goldTime = 0;
-
+                    
+                    for (Block block : blocks) {
+                        gameView.getRoots("root").getChildren().remove(block.rect);
+                    }
                     engine.stop();
                     blocks.clear();
                     chocos.clear();
                     destroyedBlockCount = 0;
-                    start(primaryStage);
+                    initBoard();
+
+                    for (Block block : blocks) {
+                        gameView.getRoots("root").getChildren().add(block.rect);
+                    }
+
+                    level++;
+
+                    xBall = sceneWidth/2.0;
+                    yBall = sceneHeigt - (sceneHeigt/4.0);
+
+                    if (level>1 && level<=18) {
+                        engine.start();
+                    }else if (level>18) {
+                        gameView.getRoots("root").getChildren().add(gameView.getLabel("winLabel"));
+                        engine.stop();
+                    }
+                    // start(primaryStage);
                     // updateScore(score);
 
                 } catch (Exception e) {
@@ -889,7 +917,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {
-                                root.getChildren().add(choco.choco);
+                                gameView.getRoots("root").getChildren().add(choco.choco);
                             }
                         });
                         chocos.add(choco);

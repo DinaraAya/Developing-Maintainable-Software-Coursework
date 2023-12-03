@@ -9,10 +9,15 @@ import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.application.Platform;
+import javafx.scene.layout.Pane;
+import javafx.scene.control.Slider;
+
 
 public class GameView {
     private Stage primaryStage;
-    private Scene scene;
+
+    private Slider           bgMusicSlider;
+    private Slider           soundSlider;
 
     private Button loadButton;
     private Button newGameButton;
@@ -32,6 +37,20 @@ public class GameView {
     private Label scoreLabel;
     private Label levelLabel;
     private Label heartLabel;
+    private Label winLabel;
+
+    public Pane root;
+    public Pane settingRoot;
+    public Pane pauseRoot;
+    public Pane gameOverRoot;
+
+    private Scene settingScene;
+    private Scene pauseScene;
+    private Scene gameOverScene;
+    private Scene scene;
+
+    private int sceneWidth = 500;
+    private int sceneHeigt = 700;
 
     private Rectangle pauseMenu;
 
@@ -41,6 +60,8 @@ public class GameView {
     }
 
     private void initializeUI(int Score, int Level, int Heart) {
+        initRoots();
+        initScene();
         initButtons();
         initLabels(Score, Level, Heart);
         initRectangles();
@@ -64,12 +85,38 @@ public class GameView {
         resumeButton2 = createCustomButton(75, 65, 210, 400, resumeButtonImage);
     }
 
+    private void initRoots() {
+        root = new Pane();
+        
+        pauseRoot = new Pane();
+
+        settingRoot = new Pane();
+
+        gameOverRoot = new Pane();
+        
+    }
+
+    private void initScene() {
+        scene = new Scene(root, sceneWidth, sceneHeigt);
+        scene.getStylesheets().add("style.css");
+
+        pauseScene = new Scene(pauseRoot, sceneWidth, sceneHeigt);
+        pauseScene.getStylesheets().addAll("style.css");
+
+        settingScene = new Scene(settingRoot, sceneWidth, sceneHeigt);
+        settingScene.getStylesheets().add("style.css");
+
+        gameOverScene = new Scene(gameOverRoot, sceneWidth, sceneHeigt);
+        gameOverScene.getStylesheets().add("style.css");
+    }
+
     private void initLabels(int Score, int Level, int Heart) {
         pauseLabel = createLabel("PAUSE", "bigText", "-fx-font-size: 24px", 180, 200);
         settingLabel = createLabel("SETTINGS", "bigText", "-fx-font-size: 24px", 145, 200);
         scoreLabel = createLabel("SCORE: " + Score, "text", "-fx-font-size: 12px", 0, 0);
         levelLabel = createLabel("LEVEL: "+Level, "text", "-fx-font-size: 12px", 0, 30);
         heartLabel = createLabel("X"+Heart, "text", "-fx-font-size: 12px" , 445, 15);
+        winLabel = createLabel("YOU WIN", "bigText", "-fx-font-size: 24px", 200, 250);
     }
 
     private void initImageView() {
@@ -129,6 +176,36 @@ public class GameView {
         return imageView;
     }
 
+    public Pane getRoots (String rootId) {
+        switch (rootId) {
+            case "root":
+                return root;
+            case "pauseRoot":
+                return pauseRoot;
+            case "settingRoot":
+                return settingRoot;
+            case "gameOverRoot":
+                return gameOverRoot;
+            default :
+                return null;
+        }
+    }
+
+    public Scene getScene (String sceneId) {
+        switch(sceneId) {
+            case "scene":
+                return scene;
+            case "pauseScene":
+                return pauseScene;
+            case "settingScene":
+                return settingScene;
+            case "gameOverScene":
+                return gameOverScene;
+            default:
+                return null;
+        }
+    }
+
     public Button getButton(String buttonId) {
         switch (buttonId) {
             case "load":
@@ -166,6 +243,8 @@ public class GameView {
                 return levelLabel;
             case "heartLabel":
                 return heartLabel;
+            case "winLabel":
+                return winLabel;
             default:
                 return null;
         }

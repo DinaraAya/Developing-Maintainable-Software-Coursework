@@ -72,6 +72,7 @@ public class Score {
             label.setTranslateX(220);
             label.setTranslateY(340);
             
+            //FIX
             main.root.getChildren().add(label);
 
             new Thread(() -> {
@@ -109,7 +110,7 @@ public class Score {
     }
 
 
-    public void showGameOver(final Main main, int score) {
+    public void showGameOver(final GameView gameView, final Main main, int score) {
         Platform.runLater(() -> {
 
             int highestScore = readHighestScore();
@@ -181,7 +182,7 @@ public class Score {
                 main.goHome();
             });
 
-            main.gameOverRoot.getChildren().addAll(label, highScoreRect, scoreRect, highScoreLabel, ScoreLabel, score1, score2, restart);
+            gameView.gameOverRoot.getChildren().addAll(label, highScoreRect, scoreRect, highScoreLabel, ScoreLabel, score1, score2, restart);
         });
     }
 
