@@ -18,6 +18,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.scene.control.Slider;
 import java.io.*;
@@ -33,7 +34,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private BgMusicManager bgMusicManager;
     private SliderManager sliderManager;
     private SliderManagerSound sliderManagerSound;
-    private UIHandler uiHandler;
+    private GameView gameView;
+    private GameModel model;
+    private GameController controller;
 
     private boolean isGamePaused = false;
 
@@ -106,9 +109,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     public  Pane             pauseRoot;
     public  Pane             settingRoot;
     public  Pane             gameOverRoot;
-    private Label            scoreLabel;
-    private Label            heartLabel;
-    private Label            levelLabel;
     private Label            countDownLabel;
     private String           bgMusicFile;
     private Media            bgMusicMedia;
@@ -129,6 +129,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+
         bgMusicManager = BgMusicManager.getInstance();
         if (!bgMusicManager.isPlaying()) {
             bgMusicManager.initialize("/bgMusic.mp3");
@@ -164,8 +165,11 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             initBoard();
 
         }
+
+        model = new GameModel();
+        controller = new GameController(model);
         
-        uiHandler = new UIHandler(primaryStage);
+        gameView = new GameView(primaryStage, score, level, heart);
         initLabels();
         initRoots();
 
@@ -180,9 +184,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         if (loadFromSave == false) {
             if (level > 1 && level < 18) {
-                root.getChildren().removeAll(uiHandler.getButton("load"), uiHandler.getButton("newGame"), uiHandler.getButton("settings"), uiHandler.getButton("quit"));
-                root.getChildren().add(uiHandler.getButton("pause"));
-                uiHandler.getButton("pause").setFocusTraversable(false); 
+                root.getChildren().removeAll(gameView.getButton("load"), gameView.getButton("newGame"), gameView.getButton("settings"), gameView.getButton("quit"));
+                root.getChildren().add(gameView.getButton("pause"));
+                gameView.getButton("pause").setFocusTraversable(false); 
                 engine = new GameEngine();
                 engine.setOnAction(this);
                 engine.setFps(240);
@@ -190,7 +194,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 engine.start();
             }
  
-            uiHandler.getButton("newGame").setOnAction(new EventHandler<ActionEvent>() {
+            gameView.getButton("newGame").setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 SoundManager.playButtonSound();
@@ -198,15 +202,15 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 engine = new GameEngine();
                 engine.setOnAction(Main.this);
                 engine.setFps(240);
-                root.getChildren().removeAll(uiHandler.getButton("pause"), uiHandler.getButton("load"), uiHandler.getButton("newGame"), uiHandler.getButton("settings"), uiHandler.getButton("quit"));
-                uiHandler.getButton("pause").setFocusTraversable(false);
+                root.getChildren().removeAll(gameView.getButton("pause"), gameView.getButton("load"), gameView.getButton("newGame"), gameView.getButton("settings"), gameView.getButton("quit"));
+                gameView.getButton("pause").setFocusTraversable(false);
                 countDownDisplay();
             }
         });
         } else {
-            root.getChildren().removeAll(uiHandler.getButton("pause"), uiHandler.getButton("load"), uiHandler.getButton("newGame"), uiHandler.getButton("settings"), uiHandler.getButton("quit"));
-            uiHandler.getButton("pause").setFocusTraversable(false);
-            root.getChildren().add(uiHandler.getButton("pause"));
+            root.getChildren().removeAll(gameView.getButton("pause"), gameView.getButton("load"), gameView.getButton("newGame"), gameView.getButton("settings"), gameView.getButton("quit"));
+            gameView.getButton("pause").setFocusTraversable(false);
+            root.getChildren().add(gameView.getButton("pause"));
             engine = new GameEngine();
             engine.setOnAction(this);
             engine.setFps(240);
@@ -236,7 +240,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                         countDownLabel.setVisible(false);
                         timeline.stop();
                         engine.start();
-                        root.getChildren().add((uiHandler.getButton("pause")));
+                        root.getChildren().add((gameView.getButton("pause")));
                     }
                 }
             })
@@ -365,7 +369,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     private void initLabels(){
-        
         //countdown label(3,2,1)
         countDownLabel = new Label("");
         countDownLabel.getStyleClass().add("bigText");
@@ -373,18 +376,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         countDownLabel.setTranslateX(sceneWidth / 2 - 20);
         countDownLabel.setTranslateY(sceneHeigt / 2);
 
-        scoreLabel = new Label("SCORE: " + score);
-        scoreLabel.getStyleClass().add("text");
-
-        levelLabel = new Label("LEVEL: " + level);
-        levelLabel.setTranslateY(30);
-        levelLabel.getStyleClass().add("text");
-        
-        heartLabel = new Label("X" + heart);
-        heartLabel.setTranslateY(15);
-        heartLabel.setTranslateX(sceneWidth - 55);
-        heartLabel.getStyleClass().add("text");
     }
+
     private void initRoots(){
         pauseRoot = new Pane();
         pauseScene = new Scene(pauseRoot, sceneWidth, sceneHeigt);
@@ -393,7 +386,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         settingRoot = new Pane();
         settingScene = new Scene(settingRoot, sceneWidth, sceneHeigt);
         settingScene.getStylesheets().add("style.css");
-        settingRoot.getChildren().addAll(uiHandler.getRectangle("pauseMenu"), bgMusicSlider, uiHandler.getButton("resume2"), uiHandler.getLabel("settingLabel"), soundSlider);
+        settingRoot.getChildren().addAll(gameView.getRectangle("pauseMenu"), bgMusicSlider, gameView.getButton("resume2"), gameView.getLabel("settingLabel"), soundSlider);
 
         gameOverRoot = new Pane();
         gameOverScene = new Scene(gameOverRoot, sceneWidth, sceneHeigt);
@@ -401,36 +394,36 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         root = new Pane();
         if (loadFromSave == false) {
-            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, uiHandler.getButton("newGame"), uiHandler.getImageView("heartImageView"), uiHandler.getButton("settings"), countDownLabel, uiHandler.getButton("quit"), uiHandler.getButton("load"));
+            root.getChildren().addAll(rect, ball, gameView.getLabel("heartLabel"), gameView.getLabel("levelLabel"), gameView.getButton("newGame"), gameView.getImageView("heartImageView"), gameView.getButton("settings"), countDownLabel, gameView.getButton("quit"), gameView.getButton("load"), gameView.getLabel("scoreLabel"));
         } else {
-            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, uiHandler.getButton("newGame"), uiHandler.getImageView("heartImageView"), uiHandler.getButton("settings"), countDownLabel, uiHandler.getButton("quit"), uiHandler.getButton("load"));
+            root.getChildren().addAll(rect, ball, gameView.getLabel("heartLabel"), gameView.getLabel("levelLabel"), gameView.getButton("newGame"), gameView.getImageView("heartImageView"), gameView.getButton("settings"), countDownLabel, gameView.getButton("quit"), gameView.getButton("load"),gameView.getLabel("scoreLabel"));
         }
     }
 
     private void initButtonActions(){
-        uiHandler.getButton("settings").setOnAction(event -> {
+        gameView.getButton("settings").setOnAction(event -> {
             SoundManager.playButtonSound();
             slideUpAnimation(settingRoot);
             primaryStage.setScene(settingScene);
-            settingRoot.getChildren().addAll(uiHandler.getRectangle("pauseMenu"), bgMusicSlider, uiHandler.getButton("resume2"), uiHandler.getLabel("settingLabel"), soundSlider);
+            settingRoot.getChildren().addAll(gameView.getRectangle("pauseMenu"), bgMusicSlider, gameView.getButton("resume2"), gameView.getLabel("settingLabel"), soundSlider);
         });
 
-        uiHandler.getButton("load").setOnAction(new EventHandler<ActionEvent>() {
+        gameView.getButton("load").setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 loadGame();
-                root.getChildren().removeAll(uiHandler.getButton("load"), uiHandler.getButton("newGame"), uiHandler.getButton("settings"), uiHandler.getButton("quit"));
-                root.getChildren().add(uiHandler.getButton("pause"));
+                root.getChildren().removeAll(gameView.getButton("load"), gameView.getButton("newGame"), gameView.getButton("settings"), gameView.getButton("quit"));
+                root.getChildren().add(gameView.getButton("pause"));
             }
         });
 
 
-        uiHandler.getButton("quit").setOnAction(event-> {
+        gameView.getButton("quit").setOnAction(event-> {
             Platform.exit();
         });
 
 
-        uiHandler.getButton("restart").setOnAction(new EventHandler<ActionEvent>() {
+        gameView.getButton("restart").setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 SoundManager.playButtonSound();
@@ -439,48 +432,41 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 engine = new GameEngine();
                 engine.setOnAction(Main.this);
                 engine.setFps(240);
-                root.getChildren().removeAll(uiHandler.getButton("pause"), uiHandler.getButton("load"), uiHandler.getButton("newGame"), uiHandler.getButton("settings"), uiHandler.getButton("quit"));
-                uiHandler.getButton("pause").setFocusTraversable(false);
+                root.getChildren().removeAll(gameView.getButton("pause"), gameView.getButton("load"), gameView.getButton("newGame"), gameView.getButton("settings"), gameView.getButton("quit"));
+                gameView.getButton("pause").setFocusTraversable(false);
                 countDownDisplay();
             }
         });
 
-        uiHandler.getButton("home").setOnAction(event -> {
+        gameView.getButton("home").setOnAction(event -> {
             SoundManager.playButtonSound();
             primaryStage.setScene(scene);
             goHome();
         });
 
-        uiHandler.getButton("resume2").setOnAction(event -> {
+        gameView.getButton("resume2").setOnAction(event -> {
             SoundManager.playButtonSound();
             primaryStage.setScene(scene);
         }); 
 
-        uiHandler.getButton("resume").setOnAction(event -> {
+        gameView.getButton("resume").setOnAction(event -> {
             SoundManager.playButtonSound();
             isGamePaused = false;
-            pauseRoot.getChildren().removeAll(uiHandler.getRectangle("pauseMenu"), uiHandler.getLabel("pauseLabel"), uiHandler.getButton("restart"), uiHandler.getButton("home"), uiHandler.getButton("resume"), bgMusicSlider, soundSlider);
+            pauseRoot.getChildren().removeAll(gameView.getRectangle("pauseMenu"), gameView.getLabel("pauseLabel"), gameView.getButton("restart"), gameView.getButton("home"), gameView.getButton("resume"), bgMusicSlider, soundSlider);
             primaryStage.setScene(scene);
             engine.start();
         });
 
-        uiHandler.getButton("pause").setOnAction(event -> {
+        gameView.getButton("pause").setOnAction(event -> {
             if(!isGamePaused) {
                 SoundManager.playButtonSound();
                 isGamePaused = true;
                 engine.stop();
-                pauseRoot.getChildren().addAll(uiHandler.getRectangle("pauseMenu"), uiHandler.getLabel("pauseLabel"), uiHandler.getButton("restart"), uiHandler.getButton("home"), uiHandler.getButton("resume"), bgMusicSlider, soundSlider);
+                pauseRoot.getChildren().addAll(gameView.getRectangle("pauseMenu"), gameView.getLabel("pauseLabel"), gameView.getButton("restart"), gameView.getButton("home"), gameView.getButton("resume"), bgMusicSlider, soundSlider);
                 slideUpAnimation(pauseRoot);
                 primaryStage.setScene(pauseScene);
                 System.out.println("Game paused");
             }
-            // else{
-            //     isGamePaused = false;
-            //     primaryStage.setScene(scene);
-            //     root.getChildren().add(uiHandler.getButton("pause"));
-            //     engine.start();
-            //     System.out.println("Game resumed");
-            // }
         });
     }
 
@@ -744,7 +730,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         blocks.clear();
         chocos.clear();
 
-        uiHandler.getButton("pause").setFocusTraversable(false);
+        gameView.getButton("pause").setFocusTraversable(false);
 
         for (BlockSerializable ser : loadSave.blocks) {
             int r = new Random().nextInt(200);
@@ -859,8 +845,11 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             @Override
             public void run() {
 
-                scoreLabel.setText("SCORE: " + score);
-                heartLabel.setText("X" + heart);
+                // scoreLabel.setText("SCORE: " + score);
+                gameView.updateLabel(score);
+                gameView.updateLevel(level);
+                gameView.updateHeart(heart);
+                // heartLabel.setText("X" + heart);
 
                 rect.setX(xBreak);
                 rect.setY(yBreak);
