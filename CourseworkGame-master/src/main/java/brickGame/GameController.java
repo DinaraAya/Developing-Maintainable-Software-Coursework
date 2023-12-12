@@ -106,7 +106,6 @@ public class GameController implements EventHandler <KeyEvent>{
             gameModel.addBlocksToRoot();
             gameView.getRoots("root").getChildren().addAll(gameView.getButton("pause"));
             gameView.getButton("pause").setFocusTraversable(false);
-            // gameModel.startEngine();
             countDownDisplay();
         });
 
@@ -192,7 +191,6 @@ public class GameController implements EventHandler <KeyEvent>{
                         gameView.getLabel("countDownLabel").setVisible(false);
                         timeline.stop();
                         gameModel.startEngine();
-                        // gameView.getRoots("root").getChildren().add((gameView.getButton("pause")));
                     }
                 }
             })

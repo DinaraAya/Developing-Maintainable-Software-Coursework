@@ -3,7 +3,6 @@ package brickGame;
 import java.util.ArrayList;
 import java.util.Random;
 import javafx.application.Platform;
-import javafx.scene.control.Slider;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -364,17 +363,6 @@ public class GameModel implements GameEngine.OnAction{
             @Override
             public void run() {
 
-                // scoreLabel.setText("SCORE: " + score);
-                // gameView.updateLabel(score);
-                // gameView.updateLevel(level);
-                // gameView.updateHeart(heart);
-                // gameView.getBreakObservable().setScoreProperty(score);
-                // gameView.getBreakObservable().setLevelProperty(level);
-                // gameView.getBreakObservable().setHeartProperty(heart);
-
-                // heartLabel.setText("X" + heart);
-
-                // gameView.getBreakObservable().setXBall(xBall);
                 observable.setHeartProperty(heart);
                 observable.setLevelProperty(level);
                 observable.setScoreProperty(score);
@@ -384,12 +372,6 @@ public class GameModel implements GameEngine.OnAction{
 
                 observable.setXBreak(xBreak);
                 observable.setYBreak(yBreak);
-                // gameView.getBreakObservable().setYBall(yBall);
-                // rect.setX(xBreak);
-                // rect.setY(yBreak);
-
-                // ball.setCenterX(xBall);
-                // ball.setCenterY(yBall);
 
                 for (Bonus choco : chocos) {
                     choco.choco.setY(choco.y);
@@ -405,17 +387,12 @@ public class GameModel implements GameEngine.OnAction{
                     // new Score().show(block.x, block.y, 1, this);
 
                     block.onHit();
-
-                    // block.rect.setVisible(false);
-                    // block.isDestroyed = true;
                 
                     if(block.isDestroyed) {
                         score += 1;
                         destroyedBlockCount++;
-                        // updateScore(score);
                     }
 
-                    //System.out.println("size is " + blocks.size());
                     resetColideFlags();
 
                     if (block.type == Block.BLOCK_CHOCO) {
@@ -433,7 +410,6 @@ public class GameModel implements GameEngine.OnAction{
                     if (block.type == Block.BLOCK_STAR) {
                         goldTime = time;
                         gameView.getBall().setFill(new ImagePattern(new Image("goldball1.png")));
-                        // ball.setFill(new ImagePattern(new Image("goldball.png")));
                         System.out.println("gold ball");
                         isGoldStauts = true;
                     }
@@ -464,8 +440,6 @@ public class GameModel implements GameEngine.OnAction{
 
         if (time - goldTime > 5000) {
             gameView.getBall().setFill(new ImagePattern(new Image("ball1.png")));
-            // ball.setFill(new ImagePattern(new Image("ball1.png")));
-            // root.getStyleClass().remove("goldRoot");
             isGoldStauts = false;
         }
 
@@ -483,14 +457,11 @@ public class GameModel implements GameEngine.OnAction{
             }
             choco.y += ((time - choco.timeCreated) / 1000.000) + 1.000;
         }
-        //System.out.println("time is:" + time + " goldTime is " + goldTime);
     }
 
 
     private void checkDestroyedCount() {
         if (destroyedBlockCount == blocks.size()) {
-            //TODO win level todo...
-            //System.out.println("You Win");
             nextLevel();
         }
     }
@@ -509,7 +480,6 @@ public class GameModel implements GameEngine.OnAction{
     public void restartGame() {
 
         try {
-            //engine.stop();
             level = 1;
             heart = 3;
             score = 0;
@@ -517,7 +487,6 @@ public class GameModel implements GameEngine.OnAction{
             destroyedBlockCount = 0;
             resetColideFlags();
             goDownBall = true;
-            // isGamePaused = false;
 
             isGoldStauts = false;
             isExistHeartBlock = false;
@@ -535,7 +504,6 @@ public class GameModel implements GameEngine.OnAction{
             addBlocksToRoot();
 
             engine.start();
-            // start(primaryStage);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -645,9 +613,6 @@ public class GameModel implements GameEngine.OnAction{
         colideToTopBlock = loadSave.colideToTopBlock;
         level = loadSave.level;
         score = loadSave.score;
-        // observable.setScoreProperty(score);
-        // observable.setHeartProperty(heart);
-        // observable.setLevelProperty(level);
         heart = loadSave.heart;
         destroyedBlockCount = 0;
         xBall = loadSave.xBall;
@@ -672,8 +637,6 @@ public class GameModel implements GameEngine.OnAction{
         try {
             initializeFromSave();
             engine.start();
-            // loadFromSave = true;
-            // start(primaryStage);
         } catch (Exception e) {
             e.printStackTrace();
         }

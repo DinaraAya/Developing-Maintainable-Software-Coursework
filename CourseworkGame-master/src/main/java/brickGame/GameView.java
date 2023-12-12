@@ -9,11 +9,9 @@ import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.scene.layout.Pane;
-import javafx.scene.control.Slider;
 import javafx.scene.shape.Circle;
 import javafx.scene.Parent;
 import javafx.animation.TranslateTransition;
-import javafx.geometry.Orientation;
 import javafx.util.Duration;
 
 public class GameView {

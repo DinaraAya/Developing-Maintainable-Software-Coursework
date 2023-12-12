@@ -56,10 +56,4 @@ public class BgMusicManager {
         }
     }
 
-    public void resume() {
-        if (mediaPlayer != null) {
-            mediaPlayer.play();
-        }
-}
-
 }

@@ -2,7 +2,6 @@ package brickGame;
 
 
 import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 
@@ -10,8 +9,6 @@ import java.io.Serializable;
 
 public class Block implements Serializable {
     private static Block block = new Block(-1, -1, 99);
-
-    private boolean isHit;
 
     public int row;
     public int column;

@@ -15,9 +15,6 @@ public class GameEngine {
         this.onAction = onAction;
     }
 
-    /**
-     * @param fps set fps and we convert it to millisecond
-     */
     public void setFps(int fps) {
         this.fps = (int) 1000 / fps;
     }
@@ -72,9 +69,6 @@ public class GameEngine {
     public void stop() {
         if (!isStopped) {
             isStopped = true;
-            // updateThread.stop();
-            // physicsThread.stop();
-            // timeThread.stop();
         }
     }
 
