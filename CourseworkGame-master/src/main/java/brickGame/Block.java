@@ -58,6 +58,10 @@ public class Block implements Serializable {
         lastHitTime = currentTime;
         hitCount++;
 
+        if(type == BLOCK_CHOCO || type == BLOCK_HEART || type == BLOCK_STAR) {
+            isDestroyed = true;
+            rect.setVisible(false);
+        }else{
         if (hitCount == 1) {
             Image crackedImage = new Image("cracked_bloc.png");
             ImagePattern crackedPattern = new ImagePattern(crackedImage);
@@ -66,6 +70,7 @@ public class Block implements Serializable {
             isDestroyed = true;
             rect.setVisible(false);
         }
+    }
     }
 
 

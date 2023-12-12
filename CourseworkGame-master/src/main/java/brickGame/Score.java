@@ -4,31 +4,11 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.ImagePattern;
-import javafx.scene.shape.Rectangle;
-import javafx.stage.Stage;
-import javafx.scene.Scene;
-
-
-
 //import sun.plugin2.message.Message;
 
 public class Score {
-    private Rectangle highScoreRect;
-    private Rectangle scoreRect;
-
-    private Stage primaryStage;
-    
-
     public void show(final double x, final double y, int score, final Main main) {
         String sign;
         if (score >= 0) {
@@ -73,7 +53,7 @@ public class Score {
             label.setTranslateY(340);
             
             //FIX
-            main.root.getChildren().add(label);
+            // main.root.getChildren().add(label);
 
             new Thread(() -> {
                 for (int i = 0; i < 21; i++) {
@@ -110,7 +90,7 @@ public class Score {
     }
 
 
-    public void showGameOver(final GameView gameView, final Main main, int score) {
+    public void showGameOver(final GameView gameView, final GameModel gameModel, int score) {
         Platform.runLater(() -> {
 
             int highestScore = readHighestScore();
@@ -119,70 +99,7 @@ public class Score {
                 saveHighestScore(highestScore);
             }
 
-            Label label = new Label("GAME OVER");
-            label.getStyleClass().add("bigText");
-            label.setTranslateX(180);
-            label.setTranslateY(210);
-            label.setScaleX(2);
-            label.setScaleY(2);
-
-            Image highScoreImage = new Image("highscore.png");
-            ImagePattern highScorePattern = new ImagePattern(highScoreImage);
-            highScoreRect = new Rectangle(200, 130);
-            highScoreRect.setTranslateY(260);
-            highScoreRect.setTranslateX(40);
-            highScoreRect.setFill(highScorePattern);
-
-            Image scoreImage = new Image("score.png");
-            ImagePattern scoreImagePattern = new ImagePattern(scoreImage);
-            scoreRect = new Rectangle(200, 130);
-            scoreRect.setTranslateY(260);
-            scoreRect.setTranslateX(248);
-            scoreRect.setFill(scoreImagePattern);
-
-            Label highScoreLabel = new Label("SCORE");
-            highScoreLabel.getStyleClass().add("text");
-            highScoreLabel.setStyle("-fx-font-size: 16px");
-            highScoreLabel.setTranslateX(90);
-            highScoreLabel.setTranslateY(260);
-
-            Label score1 = new Label(String.valueOf(score));
-            score1.getStyleClass().add("bigText");
-            score1.setStyle("-fx-font-size: 36px");
-            score1.setTranslateX(95);
-            score1.setTranslateY(310);
-
-            Label score2 = new Label(String.valueOf(highestScore));
-            score2.getStyleClass().add("bigText");
-            score2.setStyle("-fx-font-size: 36px");
-            score2.setTranslateX(290);
-            score2.setTranslateY(310);
-
-            Label ScoreLabel = new Label("BEST");
-            ScoreLabel.getStyleClass().add("text");
-            ScoreLabel.setStyle("-fx-font-size: 16px");
-            ScoreLabel.setTranslateX(310);
-            ScoreLabel.setTranslateY(260);
-            
-            Button restart = new Button("Restart");
-            restart.setTranslateX(220);
-            restart.setTranslateY(300);
-            restart.setOnAction(event -> main.goHome());
-
-            Image restartImage = new Image("restart.png");
-            ImageView restartView = new ImageView(restartImage);
-            restart = new Button("");
-            restart.setId("pause-button");
-            restart.setPrefSize(65, 55);
-            restart.setTranslateX(210);
-            restart.setTranslateY(420);
-            restart.setGraphic(restartView);
-
-            restart.setOnAction(event -> {
-                main.goHome();
-            });
-
-            gameView.gameOverRoot.getChildren().addAll(label, highScoreRect, scoreRect, highScoreLabel, ScoreLabel, score1, score2, restart);
+            gameView.updateGameOverScore(score, highestScore);
         });
     }
 
@@ -204,7 +121,7 @@ public class Score {
                 label.setTranslateY(250);
                 label.setScaleX(2);
                 label.setScaleY(2);
-                main.root.getChildren().addAll(label);
+                // main.root.getChildren().addAll(label);
 
             }
         });

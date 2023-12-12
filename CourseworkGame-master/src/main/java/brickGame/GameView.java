@@ -8,16 +8,20 @@ import javafx.scene.image.ImageView;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
-import javafx.application.Platform;
 import javafx.scene.layout.Pane;
 import javafx.scene.control.Slider;
-
+import javafx.scene.shape.Circle;
+import javafx.scene.Parent;
+import javafx.animation.TranslateTransition;
+import javafx.geometry.Orientation;
+import javafx.util.Duration;
 
 public class GameView {
-    private Stage primaryStage;
+    private Stage            primaryStage;
 
-    private Slider           bgMusicSlider;
-    private Slider           soundSlider;
+    private Circle ball;
+    private int       ballRadius = 10;
+    private Rectangle rect;
 
     private Button loadButton;
     private Button newGameButton;
@@ -29,6 +33,7 @@ public class GameView {
     private Button pauseButton;
     private Button resumeButton;
     private Button resumeButton2;
+    private Button restartFromGameOver;
 
     private ImageView heartImageView;
 
@@ -38,6 +43,11 @@ public class GameView {
     private Label levelLabel;
     private Label heartLabel;
     private Label winLabel;
+    private Label gameOverLabel;
+    private Label highScoreLabel;
+    private Label score1;
+    private Label score2;
+    private Label countDownLabel;
 
     public Pane root;
     public Pane settingRoot;
@@ -52,20 +62,37 @@ public class GameView {
     private int sceneWidth = 500;
     private int sceneHeigt = 700;
 
-    private Rectangle pauseMenu;
+    private int breakWidth     = 130;
+    private int breakHeight    = 30;
 
-    public GameView(Stage primaryStage, int Score, int Level, int Heart) {
+    private double xBreak = 0.0f;
+    private double yBreak = 640.0f;
+
+    private Rectangle pauseMenu;
+    private Rectangle highScoreRect;
+    private Rectangle scoreRect;
+
+    public GameView(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        initializeUI(Score, Level, Heart);
+        initializeUI();
+        
+        root.getChildren().addAll(ball, rect, newGameButton, settingsButton, quitButton, loadButton, heartImageView, scoreLabel, heartLabel, levelLabel);
+
+        primaryStage.setTitle("Game");
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 
-    private void initializeUI(int Score, int Level, int Heart) {
+
+    public void initializeUI() {
         initRoots();
         initScene();
         initButtons();
-        initLabels(Score, Level, Heart);
         initRectangles();
+        initLabels();
         initImageView();
+        initBall();
+        initBreak();
     }
 
     private void initButtons() {
@@ -83,18 +110,68 @@ public class GameView {
         Image resumeButtonImage = new Image("resume.png");
         resumeButton = createCustomButton(75, 65, 210, 400, resumeButtonImage);
         resumeButton2 = createCustomButton(75, 65, 210, 400, resumeButtonImage);
+        restartFromGameOver = createCustomButton(65, 55, 210, 420, restartButtonImage);
     }
 
     private void initRoots() {
         root = new Pane();
-        
         pauseRoot = new Pane();
-
         settingRoot = new Pane();
-
-        gameOverRoot = new Pane();
-        
+        gameOverRoot = new Pane(); 
     }
+
+    public void initBall() {
+        this.ball = new Circle();
+        this.ball.setRadius(ballRadius);
+        this.ball.setFill(new ImagePattern(new Image("ball1.png")));
+    }
+
+    public void initBreak() {
+        this.rect = new Rectangle();
+        this.rect.setWidth(breakWidth);
+        this.rect.setHeight(breakHeight);
+        this.rect.setX(xBreak);
+        this.rect.setY(yBreak);
+        ImagePattern pattern = new ImagePattern(new Image("ground.png"));
+        this.rect.setFill(pattern);
+    }
+
+    public void showGameScreen() {
+        root.getChildren().add(countDownLabel);
+        root.getChildren().removeAll(loadButton, newGameButton, settingsButton, quitButton);
+    }
+
+    public void showPauseScreen(){
+        primaryStage.setScene(pauseScene);
+    }
+
+    public void showMainMenu() {
+        initializeUI();
+        root.getChildren().addAll(ball, rect, newGameButton, settingsButton, quitButton, loadButton, heartImageView, scoreLabel, heartLabel, levelLabel);
+        primaryStage.setScene(scene);
+    }
+
+
+
+    public void showSettingScreen() {
+        settingRoot.getChildren().addAll(pauseMenu, resumeButton2, settingLabel);
+        primaryStage.setScene(settingScene);
+    }
+
+    public void showGameOverScreen() {
+        gameOverRoot.getChildren().addAll(scoreRect, highScoreRect, gameOverLabel, highScoreLabel, score1, score2, restartFromGameOver);
+        primaryStage.setScene(gameOverScene);
+    }
+
+    public void resumeToMainMenu() {
+        settingRoot.getChildren().removeAll(pauseMenu, resumeButton2, settingLabel);
+        primaryStage.setScene(scene);
+    }
+
+    public void resumeGame(){
+        primaryStage.setScene(scene);
+    }
+
 
     private void initScene() {
         scene = new Scene(root, sceneWidth, sceneHeigt);
@@ -110,23 +187,32 @@ public class GameView {
         gameOverScene.getStylesheets().add("style.css");
     }
 
-    private void initLabels(int Score, int Level, int Heart) {
+    private void initRectangles() {
+        Image pauseMenuImage = new Image("pauseMenu.png");
+        pauseMenu = createRectangle(345, 130, 75, 250, pauseMenuImage);
+        Image highScoreImage = new Image("highscore.png");
+        highScoreRect = createRectangle(200, 130, 40, 260, highScoreImage);
+        Image scoreImage = new Image("score.png");
+        scoreRect = createRectangle(200, 130, 248, 260, scoreImage);
+    }
+
+    private void initLabels() {
         pauseLabel = createLabel("PAUSE", "bigText", "-fx-font-size: 24px", 180, 200);
         settingLabel = createLabel("SETTINGS", "bigText", "-fx-font-size: 24px", 145, 200);
-        scoreLabel = createLabel("SCORE: " + Score, "text", "-fx-font-size: 12px", 0, 0);
-        levelLabel = createLabel("LEVEL: "+Level, "text", "-fx-font-size: 12px", 0, 30);
-        heartLabel = createLabel("X"+Heart, "text", "-fx-font-size: 12px" , 445, 15);
+        scoreLabel = createLabel("SCORE: 0", "text", "-fx-font-size: 12px", 0, 0);
+        levelLabel = createLabel("LEVEL: 1", "text", "-fx-font-size: 12px", 0, 30);
+        heartLabel = createLabel("X3", "text", "-fx-font-size: 12px" , 445, 15);
         winLabel = createLabel("YOU WIN", "bigText", "-fx-font-size: 24px", 200, 250);
+        gameOverLabel = createLabel("GAMEOVER", "bigText", "-fx-font-size: 24px", 150, 210);
+        highScoreLabel = createLabel("SCORE          HIGH SCORE", "text", "fx-font-size: 16px", 100, 260);
+        score1 = createLabel(" ", "bigText", "-fx-font-size: 36px", 100, 310);
+        score2 = createLabel(" ", "bigText", "-fx-font-size: 36px", 300, 310);
+        countDownLabel = createLabel(" ", "bigText", "-fx-font-size: 36px", sceneWidth / 2 - 20, sceneHeigt/2);
     }
 
     private void initImageView() {
         Image heartImage = new Image("lives.png");
         heartImageView = createImageView(400, 10, 40, 40, heartImage);
-    }
-
-    private void initRectangles() {
-        Image pauseMenuImage = new Image("pauseMenu.png");
-        pauseMenu = createRectangle(345, 130, 75, 250, pauseMenuImage);
     }
 
     private Button createButton(String text, double width, double height, double translateX, double translateY) {
@@ -174,6 +260,13 @@ public class GameView {
         imageView.setFitWidth(width);
         imageView.setFitHeight(height);
         return imageView;
+    }
+
+    public void slideUpAnimation(Parent root) {
+        TranslateTransition slideUp = new TranslateTransition(Duration.seconds(0.5), root);
+        slideUp.setFromY(sceneHeigt);
+        slideUp.setToY(0);
+        slideUp.play();
     }
 
     public Pane getRoots (String rootId) {
@@ -226,6 +319,8 @@ public class GameView {
                 return resumeButton;
             case "resume2":
                 return resumeButton2;
+            case "restartGameover":
+                return restartFromGameOver;
             default:
                 return null;
         }
@@ -245,6 +340,16 @@ public class GameView {
                 return heartLabel;
             case "winLabel":
                 return winLabel;
+            case "gameOverLabel":
+                return gameOverLabel;
+            case "highScoreLabel":
+                return highScoreLabel;
+            case "score1":
+                return score1;
+            case "score2":
+                return score2;
+            case "countDownLabel":
+                return countDownLabel;
             default:
                 return null;
         }
@@ -254,6 +359,12 @@ public class GameView {
         switch (rectangleId) {
             case "pauseMenu":
                 return pauseMenu;
+            case "scoreRect":
+                return scoreRect;
+            case "highScoreRect":
+                return highScoreRect;
+            case "rect":
+                return rect;
             default:
                 return null;
         }
@@ -268,16 +379,13 @@ public class GameView {
         }
     }
 
-    public void updateLabel(int score){
-        this.scoreLabel.setText("SCORE: "+ score);
+    public Circle getBall(){
+        return ball;
     }
 
-    public void updateLevel(int level){
-        this.levelLabel.setText("LEVEL: "+level);
-    }
-
-    public void updateHeart(int heart){
-        this.heartLabel.setText("X"+heart);
+    public void updateGameOverScore(int score, int highestScore) {
+        this.score1.setText("" + score);
+        this.score2.setText("" + highestScore);
     }
 
 }

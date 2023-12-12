@@ -5,7 +5,6 @@ import javafx.scene.control.Slider;
 import javafx.scene.media.MediaPlayer;
 
 public class SoundManager {
-    // private static MediaPlayer bonusPlayer;
     public  static SoundManager instance;
     private static MediaPlayer levelUpPlayer;
     private static MediaPlayer hitBlockPlayer;
@@ -21,31 +20,16 @@ public class SoundManager {
         return instance;
     }
 
-
-
-
     static {
-        // // Load sound files
-        // Media bonusSound = new Media(SoundManager.class.getResource("/bonus_sound.wav").toString());
-        // bonusPlayer = new MediaPlayer(bonusSound);
-
         Media buttonSound = new Media(SoundManager.class.getResource("/button.mp3").toString());
         buttonPlayer = new MediaPlayer(buttonSound);
 
         Media gameOverSound = new Media(SoundManager.class.getResource("/gameover.wav").toString());
         gameOverPlayer = new MediaPlayer(gameOverSound);
 
-        // Media levelUpSound = new Media(SoundManager.class.getResource("/levelup.wav").toString());
-        // levelUpPlayer = new MediaPlayer(levelUpSound);
-
-        Media hitBlockSound = new Media(SoundManager.class.getResource("/kick.wav").toString());
-        hitBlockPlayer = new MediaPlayer(hitBlockSound);
+        Media bonusSound = new Media(SoundManager.class.getResource("/bonus.wav").toString());
+        hitBlockPlayer = new MediaPlayer(bonusSound);
     }
-
-    // public static void playBonusSound() {
-    //     bonusPlayer.stop();
-    //     bonusPlayer.play();
-    // }
 
     public void setSoundSlider(Slider soundSlider) {
         this.soundSlider = soundSlider;
@@ -66,8 +50,7 @@ public class SoundManager {
         levelUpPlayer.play();
     }
 
-    public static void playHitBlockSound() {
-        hitBlockPlayer.stop();
+    public static void playBonusSound() {
         hitBlockPlayer.play();
     }
 
