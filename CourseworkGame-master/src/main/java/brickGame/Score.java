@@ -18,31 +18,6 @@ public class Score {
         final Label label = new Label(sign + score);
         label.setTranslateX(x);
         label.setTranslateY(y);
-
-        // Platform.runLater(new Runnable() {
-        //     @Override
-        //     public void run() {
-        //         main.root.getChildren().add(label);
-        //     }
-        // });
-
-        
-        // new Thread(new Runnable() {
-        //     @Override
-        //     public void run() {
-        //         for (int i = 0; i < 21; i++) {
-        //             try {
-        //                 label.setScaleX(i);
-        //                 label.setScaleY(i);
-        //                 label.setOpacity((20 - i) / 20.0);
-        //                 Thread.sleep(15);
-        //             } catch (InterruptedException e) {
-        //                 e.printStackTrace();
-        //             }
-        //         }
-        //         main.root.getChildren().remove(label);
-        //     }
-        // }).start();
     }
 
     public void showMessage(String message, final Main main) {
@@ -50,9 +25,6 @@ public class Score {
             Label label = new Label(message);
             label.setTranslateX(220);
             label.setTranslateY(340);
-            
-            //FIX
-            // main.root.getChildren().add(label);
 
             new Thread(() -> {
                 for (int i = 0; i < 21; i++) {
@@ -120,8 +92,6 @@ public class Score {
                 label.setTranslateY(250);
                 label.setScaleX(2);
                 label.setScaleY(2);
-                // main.root.getChildren().addAll(label);
-
             }
         });
     }
