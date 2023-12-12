@@ -645,6 +645,9 @@ public class GameModel implements GameEngine.OnAction{
         colideToTopBlock = loadSave.colideToTopBlock;
         level = loadSave.level;
         score = loadSave.score;
+        // observable.setScoreProperty(score);
+        // observable.setHeartProperty(heart);
+        // observable.setLevelProperty(level);
         heart = loadSave.heart;
         destroyedBlockCount = 0;
         xBall = loadSave.xBall;
@@ -665,7 +668,6 @@ public class GameModel implements GameEngine.OnAction{
             int r = new Random().nextInt(200);
             blocks.add(new Block(ser.row, ser.j, ser.type));
         }
-
 
         try {
             initializeFromSave();
